@@ -1,11 +1,11 @@
 /*****************************************************
-Esta classe Codegen �� a respons��vel por emitir LLVM-IR. 
-Ela possui o mesmo m��todo 'visit' sobrecarregado de
-acordo com o tipo do par��metro. Se o par��mentro for
-do tipo 'While', o 'visit' emitir�� c��digo LLVM-IR que 
+Esta classe Codegen ������ a respons������vel por emitir LLVM-IR. 
+Ela possui o mesmo m������todo 'visit' sobrecarregado de
+acordo com o tipo do par������metro. Se o par������mentro for
+do tipo 'While', o 'visit' emitir������ c������digo LLVM-IR que 
 representa este comportamento. 
-Alguns m��todos 'visit' j�� est��o prontos e, por isso,
-a compila����o do c��digo abaixo j�� �� poss��vel.
+Alguns m������todos 'visit' j������ est������o prontos e, por isso,
+a compila������������o do c������digo abaixo j������ ������ poss������vel.
 
 class a{
     public static void main(String[] args){
@@ -14,8 +14,8 @@ class a{
 }
 
 O pacote 'llvmast' possui estruturas simples 
-que auxiliam a gera����o de c��digo em LLVM-IR. Quase todas 
-as classes est��o prontas; apenas as seguintes precisam ser 
+que auxiliam a gera������������o de c������digo em LLVM-IR. Quase todas 
+as classes est������o prontas; apenas as seguintes precisam ser 
 implementadas: 
 
 // llvmasm/LlvmBranch.java
@@ -24,11 +24,11 @@ implementadas:
 // llvmasm/LlvmTimes.java
 
 
-Todas as assinaturas de m��todos e construtores 
-necess��rias j�� est��o l��. 
+Todas as assinaturas de m������todos e construtores 
+necess������rias j������ est������o l������. 
 
 
-Observem todos os m��todos e classes j�� implementados
+Observem todos os m������todos e classes j������ implementados
 e o manual do LLVM-IR (http://llvm.org/docs/LangRef.html) 
 como guia no desenvolvimento deste projeto. 
 
@@ -54,19 +54,19 @@ public class Codegen extends VisitorAdapter{
 		assembler = new LinkedList<LlvmInstruction>();
 	}
 
-	// M��todo de entrada do Codegen
+	// M������todo de entrada do Codegen
 	public String translate(Program p, Env env){	
 		codeGenerator = new Codegen();
 		
-		// Preenchendo a Tabela de S��mbolos
+		// Preenchendo a Tabela de S������mbolos
 		// Quem quiser usar 'env', apenas comente essa linha
 		// codeGenerator.symTab.FillTabSymbol(p);
 		
 		// Formato da String para o System.out.printlnijava "%d\n"
 		codeGenerator.assembler.add(new LlvmConstantDeclaration("@.formatting.string", "private constant [4 x i8] c\"%d\\0A\\00\""));	
 
-		// NOTA: sempre que X.accept(Y), ent��o Y.visit(X);
-		// NOTA: Logo, o comando abaixo ir�� chamar codeGenerator.visit(Program), linha 75
+		// NOTA: sempre que X.accept(Y), ent������o Y.visit(X);
+		// NOTA: Logo, o comando abaixo ir������ chamar codeGenerator.visit(Program), linha 75
 		p.accept(codeGenerator);
 
 		// Link do printf
@@ -104,8 +104,8 @@ public class Codegen extends VisitorAdapter{
 		assembler.add(new LlvmAlloca(R1, LlvmPrimitiveType.I32, new LinkedList<LlvmValue>()));
 		assembler.add(new LlvmStore(new LlvmIntegerLiteral(0), R1));
 
-		// Statement �� uma classe abstrata
-		// Portanto, o accept chamado �� da classe que implementa Statement, por exemplo,  a classe "Print". 
+		// Statement ������ uma classe abstrata
+		// Portanto, o accept chamado ������ da classe que implementa Statement, por exemplo,  a classe "Print". 
 		n.stm.accept(this);  
 
 		// Final do Main
@@ -174,9 +174,30 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(While n){return null;}
 	public LlvmValue visit(Assign n){return null;}
 	public LlvmValue visit(ArrayAssign n){return null;}
-	public LlvmValue visit(And n){return null;}
-	public LlvmValue visit(LessThan n){return null;}
-	public LlvmValue visit(Equal n){return null;}
+	// Function AND:
+	public LlvmValue visit(And n){
+		LlvmValue v1 = n.lhs.accept(this);
+		LlvmValue v2 = n.rhs.accept(this);
+		LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmAnd(lhs,LlvmPrimitiveType.I32,v1,v2));
+		return lhs;		
+	}
+	//Function LESSTHAN:
+	public LlvmValue visit(LessThan n){
+		LlvmValue v1 = n.lhs.accept(this);
+		LlvmValue v2 = n.rhs.accept(this);
+		LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmLessThan(lhs,LlvmPrimitiveType.I32,v1,v2));
+		return lhs;
+	}
+	//Function EQUAL:
+	public LlvmValue visit(Equal n){
+		LlvmValue v1 = n.lhs.accept(this);
+		LlvmValue v2 = n.rhs.accept(this);
+		LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmEqual(lhs,LlvmPrimitiveType.I32,v1,v2));
+		return lhs;
+	}
 	public LlvmValue visit(Minus n){
 		LlvmValue v1 = n.lhs.accept(this);
 		LlvmValue v2 = n.rhs.accept(this);
@@ -194,19 +215,35 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(ArrayLookup n){return null;}
 	public LlvmValue visit(ArrayLength n){return null;}
 	public LlvmValue visit(Call n){return null;}
-	public LlvmValue visit(True n){return null;}
-	public LlvmValue visit(False n){return null;}
+	//Function TRUE
+	public LlvmValue visit(True n){
+		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmTrue(exp,LlvmPrimitiveType.I32));
+		return exp;
+	}
+	//Function FALSE
+	public LlvmValue visit(False n){
+		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmFalse(exp,LlvmPrimitiveType.I32));
+		return exp;
+	}
 	public LlvmValue visit(IdentifierExp n){return null;}
 	public LlvmValue visit(This n){return null;}
 	public LlvmValue visit(NewArray n){return null;}
 	public LlvmValue visit(NewObject n){return null;}
-	public LlvmValue visit(Not n){return null;}
+	//Function NOT:
+	public LlvmValue visit(Not n) {
+		LlvmValue v = n.exp.accept(this);
+		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmNot(exp,LlvmPrimitiveType.I32,v));
+		return exp;
+	}
 	public LlvmValue visit(Identifier n){return null;}
 }
 
 
 /**********************************************************************************/
-/* === Tabela de S��mbolos ==== 
+/* === Tabela de S������mbolos ==== 
  * 
  * 
  */
@@ -236,16 +273,16 @@ public LlvmValue visit(MainClass n){
 
 public LlvmValue visit(ClassDeclSimple n){
 	List<LlvmType> typeList = null;
-	// Constroi TypeList com os tipos das vari��veis da Classe (vai formar a Struct da classe)
+	// Constroi TypeList com os tipos das vari������veis da Classe (vai formar a Struct da classe)
 	
 	List<LlvmValue> varList = null;
-	// Constroi VarList com as Vari��veis da Classe
+	// Constroi VarList com as Vari������veis da Classe
 
 	classes.put(n.name.s, new ClassNode(n.name.s, 
 										new LlvmStructure(typeList), 
 										varList)
       			);
-    	// Percorre n.methodList visitando cada m��todo
+    	// Percorre n.methodList visitando cada m������todo
 	return null;
 }
 
