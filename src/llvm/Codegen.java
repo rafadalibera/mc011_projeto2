@@ -167,7 +167,7 @@ public class Codegen extends VisitorAdapter{
 		util.List<VarDecl> varList = n.varList;
 		Identifier name = n.name;
 		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmClassDeclSimple(exp,LlvmPrimitiveType.I32,name, varList, methodList));
+		//assembler.add(new LlvmClassDeclSimple(exp,LlvmPrimitiveType.I32, name, varList, methodList));
 		return exp;
 	}
 	//Function CLASSDECLEXTENDS:
@@ -185,7 +185,7 @@ public class Codegen extends VisitorAdapter{
 		LlvmValue type = n.type.accept(this);
 		Identifier name = n.name;
 		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmClassVarDecl(exp,LlvmPrimitiveType.I32, type, name));
+		//assembler.add(new LlvmVarDecl(exp,LlvmPrimitiveType.I32, type, name));
 		return exp;
 	}
 	//Function METHODDECL:
@@ -197,7 +197,7 @@ public class Codegen extends VisitorAdapter{
 		util.List<Statement> body = n.body;
 		util.List<VarDecl> locals = n.locals;
 		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmClassMethodDecl(exp,LlvmPrimitiveType.I32, returnType, name, formals, locals, body, returnExp));
+		//assembler.add(new LlvmMethodDecl(exp,LlvmPrimitiveType.I32, returnType, name, formals, locals, body, returnExp));
 		return exp;
 	}
 	//Function FORMAL:
@@ -205,7 +205,7 @@ public class Codegen extends VisitorAdapter{
 		LlvmValue type = n.type.accept(this);
 		Identifier name = n.name;
 		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmClassFormal(exp,LlvmPrimitiveType.I32, type, name));
+		//assembler.add(new LlvmFormal(exp,LlvmPrimitiveType.I32, type, name));
 		return exp;
 	}
 	//Function INTARRAYTYPE:
