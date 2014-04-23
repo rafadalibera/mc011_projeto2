@@ -23,7 +23,7 @@ public class LlvmClassDeclSimple extends LlvmInstruction{
 		_exp = exp;
 		_type = type;
 		_methodList = methodList;
-		_varList = varList.it
+		_varList = varList;
 		_name = name;	
 	}
 	
