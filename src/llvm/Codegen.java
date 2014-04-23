@@ -167,7 +167,7 @@ public class Codegen extends VisitorAdapter{
 		util.List<VarDecl> varList = n.varList;
 		Identifier name = n.name;
 		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmClassDeclSimple(exp,LlvmPrimitiveType.I32, name, varList, methodList));
+		assembler.add(new LlvmClassDeclSimple(exp, LlvmPrimitiveType.I32, name, varList, (List<MethodDecl>) methodList));
 		return exp;
 	}
 	//Function CLASSDECLEXTENDS:

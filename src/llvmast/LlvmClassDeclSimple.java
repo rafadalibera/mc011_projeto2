@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Queue;
 
 
-
-import org.omg.CORBA.Environment;
-
 import syntaxtree.Identifier;
 import syntaxtree.MethodDecl;
 import syntaxtree.VarDecl;
@@ -20,12 +17,13 @@ public class LlvmClassDeclSimple extends LlvmInstruction{
 	public List<VarDecl> _varList;
 	public Identifier _name;
 	
-	public LlvmClassDeclSimple(LlvmRegister exp, LlvmType type, Identifier name, List<VarDecl> varList,
+	public LlvmClassDeclSimple(LlvmRegister exp, LlvmType type, Identifier name, util.List<VarDecl> varList,
 			List<MethodDecl> methodList) {
 		_exp = exp;
 		_type = type;
 		_methodList = methodList;
-		_varList = varList;
+		
+		_varList = (List<VarDecl>) varList;
 		_name = name;	
 	}
 	
