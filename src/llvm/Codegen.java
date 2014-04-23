@@ -49,6 +49,11 @@ public class Codegen extends VisitorAdapter{
 	private ClassNode classEnv; 	// Aponta para a classe atualmente em uso em symTab
 	private MethodNode methodEnv; 	// Aponta para a metodo atualmente em uso em symTab
 
+	private int indexLabel = -1;
+	
+	public int getIndexLabel(){
+		return indexLabel + 1;
+	}
 
 	public Codegen(){
 		assembler = new LinkedList<LlvmInstruction>();
@@ -272,15 +277,26 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function IF:
 	public LlvmValue visit(If n){
-		/*
-		Exp condition = n.condition;
-		Statement thenClause = n.thenClause;
-		Statement elseClause = n.elseClause;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmIf(exp,LlvmPrimitiveType.I32, condition, thenClause, elseClause));
-		//assembler.add(new LlvmIf(exp,LlvmPrimitiveType.I32, condition, thenClause));
-		return exp;
-		*/
+		//LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I32);
+		
+		LlvmLabelValue labelThan = (new LlvmLabelValue("label" + getIndexLabel()));
+		LlvmLabelValue labelElse = (new LlvmLabelValue("label" + getIndexLabel()));
+		LlvmLabelValue labelEnd = (new LlvmLabelValue("label" + getIndexLabel()));
+		
+		assembler.add(new LlvmBranch(n.condition.accept(this), labelThan, labelElse));
+		
+		assembler.add(new LlvmLabel(labelThan));
+		n.thenClause.accept(this);
+		assembler.add(new LlvmBranch(labelEnd));
+		
+		if (n.elseClause != null) {
+			assembler.add(new LlvmLabel(labelEnd));
+			n.elseClause.accept(this);
+			assembler.add(new LlvmBranch(labelEnd));
+		}
+		
+		assembler.add(new LlvmLabel(labelEnd));
+		
 		return null;
 	}
 	//Function WHILE:
@@ -398,15 +414,21 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function TRUE:
 	public LlvmValue visit(True n){
+		/*
 		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
 		//assembler.add(new LlvmTrue(exp,LlvmPrimitiveType.I32));
 		return exp;
+		*/
+		return null;
 	}
 	//Function FALSE:
 	public LlvmValue visit(False n){
+		/*
 		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
 		//assembler.add(new LlvmFalse(exp,LlvmPrimitiveType.I32));
 		return exp;
+		*/
+		return null;
 	}
 	//Function IDENTIFIEREXP
 	public LlvmValue visit(IdentifierExp n){

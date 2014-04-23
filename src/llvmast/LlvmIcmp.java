@@ -25,6 +25,7 @@ public  class LlvmIcmp extends LlvmInstruction{
     	//lessThan
     	case 2:
     		return "  " +_lhs + " = icmp slt " + _type + " " + _op1 + ", " + _op2;
+    	//not
     	case 3:
     		return "  " + _lhs + " =  xor " + _op1 + ", under";
     	default:
