@@ -17,13 +17,13 @@ public class LlvmClassDeclSimple extends LlvmInstruction{
 	public List<VarDecl> _varList;
 	public Identifier _name;
 	
-	public LlvmClassDeclSimple(LlvmRegister exp, LlvmType type, Identifier name, util.List<VarDecl> varList,
+	public LlvmClassDeclSimple(LlvmRegister exp, LlvmType type, Identifier name, List<VarDecl> varList,
 			List<MethodDecl> methodList) {
 		_exp = exp;
 		_type = type;
-		_methodList = methodList;
+		_methodList =  methodList;
 		
-		_varList = (List<VarDecl>) varList;
+		_varList =  varList;
 		_name = name;	
 	}
 	
@@ -34,8 +34,6 @@ public class LlvmClassDeclSimple extends LlvmInstruction{
 		for(VarDecl v : _varList){
 			variaveis += v.type.toString() + " ";
 		}
-		
-		
 		
 		String s = "%" + _name + " = type { " + variaveis + " }";
 		
