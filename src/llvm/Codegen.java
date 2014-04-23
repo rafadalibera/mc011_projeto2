@@ -184,7 +184,7 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(VarDecl n){
 		LlvmValue type = n.type.accept(this);
 		Identifier name = n.name;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
+		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I1);
 		//assembler.add(new LlvmVarDecl(exp,LlvmPrimitiveType.I32, type, name));
 		return exp;
 	}

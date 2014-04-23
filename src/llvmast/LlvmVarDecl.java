@@ -14,10 +14,14 @@ public class LlvmVarDecl extends LlvmInstruction {
 		_llvmtype = llvmtype;
 		_type = type;
 		_name = name;
+		
 	}
 	
 	public String toString() {
-		String s = null;
+		String s = "";
+		
+		s = "%" + _name + "= alloca " + _llvmtype;
+		
 		return s;
 	}
 

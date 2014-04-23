@@ -34,7 +34,7 @@ public class LlvmClassDeclSimple extends LlvmInstruction{
 		
 		String variaveis = "";
 		for(VarDecl v : _varList){
-			variaveis += v.toString() + " ";
+			variaveis += v.type.toString() + " ";
 		}
 		
 		
