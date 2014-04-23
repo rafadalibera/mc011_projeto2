@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.Queue;
 
 
+
+import org.omg.CORBA.Environment;
+
 import syntaxtree.Identifier;
 import syntaxtree.MethodDecl;
 import syntaxtree.VarDecl;
 
-import util.List;
 
 public class LlvmClassDeclSimple extends LlvmInstruction{
 	public LlvmRegister _exp;
@@ -35,7 +37,16 @@ public class LlvmClassDeclSimple extends LlvmInstruction{
 			variaveis += v.toString() + " ";
 		}
 		
+		
+		
 		String s = "%" + _name + " = type { " + variaveis + " }";
+		
+		s += "\n";
+		
+		for(MethodDecl m : _methodList){
+			s += m.toString();
+			s+= "\n";
+		}
 		
 		return s;
     }
