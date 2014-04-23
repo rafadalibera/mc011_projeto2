@@ -252,21 +252,11 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function BOOLEANTYPE:
 	public LlvmValue visit(BooleanType n){
-		/*
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmBooleanType(exp,LlvmPrimitiveType.I32));
-		return exp;
-		*/
-		return null;
+		return new LlvmNamedValue("", LlvmPrimitiveType.I8);
 	}
 	//Function INTEGERTYPE:
 	public LlvmValue visit(IntegerType n){
-		/*
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmIntegerType(exp,LlvmPrimitiveType.I32));
-		return exp;
-		*/
-		return null;
+		return new LlvmNamedValue("", LlvmPrimitiveType.I32);
 	}
 	//Function IDENTIFIERTYPE:
 	public LlvmValue visit(IdentifierType n){
