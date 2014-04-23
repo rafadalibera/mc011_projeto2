@@ -30,7 +30,7 @@ public class LlvmMethodDecl extends LlvmInstruction{
 	}
 	
 	public String toString() {
-		String s = null;
+		String s = "";
 		return s;
 	}
 }
