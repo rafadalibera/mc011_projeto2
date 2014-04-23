@@ -204,17 +204,30 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function METHODDECL:
 	public LlvmValue visit(MethodDecl n){
-		/*
-		LlvmValue returnType = n.returnType.accept(this);
-		Identifier name = n.name;
-		Exp returnExp = n.returnExp;
-		util.List<Formal> formals = n.formals;
-		util.List<Statement> body = n.body;
-		util.List<VarDecl> locals = n.locals;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmMethodDecl(exp,LlvmPrimitiveType.I32, returnType, name, formals, locals, body, returnExp));
-		return exp;
-		*/
+		List<LlvmValue> listaArgs = new ArrayList<LlvmValue>();
+		for (util.List<Formal> c = n.formals; c != null; c = c.tail)
+		{
+			listaArgs.add(c.head.accept(this));
+		}
+		LlvmInstruction definition = new LlvmDefine(n.name.toString(), n.returnType.accept(this).type, listaArgs);
+		assembler.add(definition);
+		
+		for(LlvmValue v : listaArgs){
+			LlvmValue addr = new LlvmNamedValue(v.toString(), v.type);
+			
+			assembler.add(new LlvmAlloca(addr, v.type, null));
+			assembler.add(new LlvmStore(v, addr));
+		}
+		
+		for(util.List<VarDecl> v = n.locals; v != null; v = v.tail){
+			LlvmValue r = v.head.accept(this);
+			assembler.add(new LlvmAlloca(r, r.type, null));
+		}
+		
+		for(util.List<Statement> s = n.body; n != null; s = s.tail){
+			s.head.accept(this);
+		}
+		
 		return null;
 	}
 	//Function FORMAL:
