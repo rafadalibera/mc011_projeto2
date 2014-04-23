@@ -52,6 +52,7 @@ public class Codegen extends VisitorAdapter{
 	private int indexLabel = -1;
 	
 	public int getIndexLabel(){
+		
 		return indexLabel + 1;
 	}
 
@@ -62,7 +63,6 @@ public class Codegen extends VisitorAdapter{
 	// M������todo de entrada do Codegen
 	public String translate(Program p, Env env){	
 		codeGenerator = new Codegen();
-		
 		// Preenchendo a Tabela de S������mbolos
 		// Quem quiser usar 'env', apenas comente essa linha
 		// codeGenerator.symTab.FillTabSymbol(p);
@@ -501,7 +501,7 @@ public class Codegen extends VisitorAdapter{
 
 class SymTab extends VisitorAdapter{
     public Map<String, ClassNode> classes;     
-    private ClassNode classEnv;    //aponta para a classe em uso
+    public ClassNode classEnv;    //aponta para a classe em uso
 
     public LlvmValue FillTabSymbol(Program n){
 	n.accept(this);
@@ -511,7 +511,11 @@ class SymTab extends VisitorAdapter{
 		n.mainClass.accept(this);
 	
 		for (util.List<ClassDecl> c = n.classList; c != null; c = c.tail)
+		{
+			
+			
 			c.head.accept(this);
+		}
 	
 		return null;
 	}
@@ -522,16 +526,25 @@ class SymTab extends VisitorAdapter{
 	}
 	
 	public LlvmValue visit(ClassDeclSimple n){
-		List<LlvmType> typeList = null;
+		
+		List<LlvmType> typeList = new ArrayList<LlvmType>();
 		// Constroi TypeList com os tipos das vari������veis da Classe (vai formar a Struct da classe)
 		
-		List<LlvmValue> varList = null;
+		List<LlvmValue> varList = new ArrayList<LlvmValue>();
 		// Constroi VarList com as Vari������veis da Classe
 	
-		classes.put(n.name.s, new ClassNode(n.name.s, 
-											new LlvmStructure(typeList), 
-											varList)
-	      			);
+		classEnv = new ClassNode(n.name.s);
+		
+		for(util.List<VarDecl> v = n.varList; v != null; v = v.tail){
+			typeList.add(v.head.accept(this).type);
+			varList.add(v.head.accept(this));
+		}
+		
+		classEnv.AddClassType(new LlvmStructure(typeList));
+		classEnv.AddVarList(varList);
+		
+		
+		classes.put(n.name.s, classEnv);
 	    	// Percorre n.methodList visitando cada m������todo
 		return null;
 	}
@@ -547,11 +560,45 @@ class SymTab extends VisitorAdapter{
 }
 
 class ClassNode extends LlvmType {
-	ClassNode (String nameClass, LlvmStructure classType, List<LlvmValue> varList){
+	String _name;
+	LlvmStructure _classSize;
+	List<LlvmValue> _varList;
+	List<MethodNode> _methodList;
+	
+	public ClassNode (String nameClass, LlvmStructure classType, List<LlvmValue> varList){
+		_name = nameClass;
+		_classSize = classType;
+		_varList = varList;
+		_methodList = new ArrayList<MethodNode>();
+	}
+	public ClassNode(String nameClass){
+		_name = nameClass;
+	}
+	
+	public void AddClassType(LlvmStructure classType){
+		_classSize = classType;
+	}
+	
+	public void AddVarList(List<LlvmValue> varList){
+		_varList = varList;
+	}
+	
+	void AddMethod(MethodNode m){
+		_methodList.add(m);
 	}
 }
 
 class MethodNode {
+	String _name;
+	List<LlvmValue> _args;
+	List<LlvmValue> _locals;
+	
+	public MethodNode(String name, List<LlvmValue> args, List<LlvmValue> locals){
+		_name = name;
+		_args = args;
+		_locals=locals;
+	}
+	
 }
 
 
