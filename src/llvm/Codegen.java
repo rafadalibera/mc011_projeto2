@@ -193,13 +193,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function VARDECL:
 	public LlvmValue visit(VarDecl n){
-		/*
-		LlvmValue type = n.type.accept(this);
-		Identifier name = n.name;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I1);
-		//assembler.add(new LlvmVarDecl(exp,LlvmPrimitiveType.I32, type, name));
-		return exp;
-		*/
+		assembler.add(new LlvmAlloca(n.name.accept(this), n.type.accept(this).type, null));
 		return null;
 	}
 	//Function METHODDECL:
