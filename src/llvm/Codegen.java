@@ -237,11 +237,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function INTARRAYTYPE:
 	public LlvmValue visit(IntArrayType n){
-		/*
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmIntArrayType(exp,LlvmPrimitiveType.I32));
-		return exp;
-		*/
+		//return new LlvmNamedValue("", LlvmPrimitiveType.I32);
 		return null;
 	}
 	//Function BOOLEANTYPE:
@@ -254,13 +250,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function IDENTIFIERTYPE:
 	public LlvmValue visit(IdentifierType n){
-		/*
-		String name = n.name;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmIdentifierType(exp,LlvmPrimitiveType.I32, name));
-		return exp;
-		*/
-		return null;
+		return new LlvmNamedValue(n.name, LlvmPrimitiveType.I32);
 	}
 	//Function BLOCK:
 	public LlvmValue visit(Block n){
@@ -417,21 +407,11 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function TRUE:
 	public LlvmValue visit(True n){
-		/*
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmTrue(exp,LlvmPrimitiveType.I32));
-		return exp;
-		*/
-		return null;
+		return new LlvmBool(1);
 	}
 	//Function FALSE:
 	public LlvmValue visit(False n){
-		/*
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmFalse(exp,LlvmPrimitiveType.I32));
-		return exp;
-		*/
-		return null;
+		return new LlvmBool(0);
 	}
 	//Function IDENTIFIEREXP
 	public LlvmValue visit(IdentifierExp n){
