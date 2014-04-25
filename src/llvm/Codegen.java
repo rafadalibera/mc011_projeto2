@@ -304,13 +304,19 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function WHILE:
 	public LlvmValue visit(While n){
-		/*
-		Exp condition = n.condition;
-		Statement body = n.body;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmWhile(exp,LlvmPrimitiveType.I32, condition, body));
-		return exp;
-		*/
+		
+		LlvmLabelValue labelLoop = (new LlvmLabelValue("label" + getIndexLabel()));
+		LlvmLabelValue labelBegin = (new LlvmLabelValue("label" + getIndexLabel()));
+		LlvmLabelValue labelEnd = (new LlvmLabelValue("label" + getIndexLabel()));
+		
+		assembler.add(new LlvmLabel(labelLoop));
+		
+		assembler.add(new LlvmBranch(n.condition.accept(this), labelBegin, labelEnd));
+		n.body.accept(this);
+		assembler.add(new LlvmBranch(labelLoop));
+		
+		assembler.add(new LlvmLabel(labelEnd));
+
 		return null;
 	}
 	//Function ASSIGN:

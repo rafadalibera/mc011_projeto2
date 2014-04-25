@@ -7,9 +7,3 @@ class m
     }
 }
 
-class c
-{
-	int i;
-	boolean j;
-}
-
