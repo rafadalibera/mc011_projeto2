@@ -561,7 +561,7 @@ class SymTab extends VisitorAdapter{
 		}
 		
 		public LlvmValue visit(MethodDecl n){
-			GetClassInUse().AddMethod(n.name.s, new MethodNode(n.name.s));
+			GetClassInUse().AddMethod(n.name.s, new MethodNode(n.name.s, n.returnType.accept(this)));
 			SetMethodInUse(n.name.s);
 			for(util.List<VarDecl> v = n.locals; v != null; v = v.tail){
 				LlvmValue local = v.head.accept(this);
@@ -642,10 +642,12 @@ class ClassNode extends LlvmType {
 
 class MethodNode {
 	String _name;
+	LlvmValue _returnType;
 	Map<String, LlvmValue> _params = new HashMap<String, LlvmValue>();
 	Map<String, LlvmValue> _locals = new HashMap<String, LlvmValue>();
-	public MethodNode(String name){
+	public MethodNode(String name, LlvmValue returnType){
 		_name = name;
+		_returnType = returnType;
 	}
 	public void AddParam(String paramName, LlvmValue param){
 		_params.put(paramName, param);
@@ -660,6 +662,9 @@ class MethodNode {
 		return _locals.get(localName);
 	}
 	
+	public LlvmValue GetReturnType(){
+		return _returnType;
+	}
 }
 
 
