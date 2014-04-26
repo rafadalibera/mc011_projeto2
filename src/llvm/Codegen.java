@@ -45,7 +45,7 @@ public class Codegen extends VisitorAdapter{
 	private List<LlvmInstruction> assembler;
 	private Codegen codeGenerator;
 
-  	private SymTab symTab;
+  	private SymTab symTab = new SymTab();
 	private ClassNode classEnv; 	// Aponta para a classe atualmente em uso em symTab
 	private MethodNode methodEnv; 	// Aponta para a metodo atualmente em uso em symTab
 
@@ -91,6 +91,7 @@ public class Codegen extends VisitorAdapter{
 	}
 
 	public LlvmValue visit(Program n){
+		symTab.FillTabSymbol(n);
 		n.mainClass.accept(this);
 
 		for (util.List<ClassDecl> c = n.classList; c != null; c = c.tail)
@@ -480,9 +481,30 @@ public class Codegen extends VisitorAdapter{
 /**********************************************************************************/
 
 class SymTab extends VisitorAdapter{
-    public Map<String, ClassNode> classes;     
-    public ClassNode classEnv;    //aponta para a classe em uso
-
+    public Map<String, ClassNode> classes = new HashMap<String, ClassNode>();     
+    private ClassNode classEnv;    //aponta para a classe em uso
+    private MethodNode methodEnv;
+    
+    void SetClassInUse(String className){
+    	classEnv = classes.get(className);
+    }
+    
+    public ClassNode GetClassInUse(){
+    	return classEnv;
+    }
+    
+    public void SetMethodInUse(String methodName){
+    	methodEnv = classEnv._methodList.get(methodName);
+    }
+    
+    public MethodNode GetMethodInUse(){
+    	return methodEnv;
+    }
+    
+    
+    
+    //--------------------------------------//
+    
     public LlvmValue FillTabSymbol(Program n){
 	n.accept(this);
 	return null;
@@ -491,9 +513,7 @@ class SymTab extends VisitorAdapter{
 		n.mainClass.accept(this);
 	
 		for (util.List<ClassDecl> c = n.classList; c != null; c = c.tail)
-		{
-			
-			
+		{	
 			c.head.accept(this);
 		}
 	
@@ -501,56 +521,94 @@ class SymTab extends VisitorAdapter{
 	}
 	
 	public LlvmValue visit(MainClass n){
-		classes.put(n.className.s, new ClassNode(n.className.s, null, null));
+		classes.put(n.className.s, new ClassNode(n.className.s));
+		SetClassInUse(n.className.s);
+		
 		return null;
 	}
 	
 	public LlvmValue visit(ClassDeclSimple n){
 		
-		List<LlvmType> typeList = new ArrayList<LlvmType>();
+		
 		// Constroi TypeList com os tipos das vari������veis da Classe (vai formar a Struct da classe)
 		
-		List<LlvmValue> varList = new ArrayList<LlvmValue>();
+		
 		// Constroi VarList com as Vari������veis da Classe
 	
-		classEnv = new ClassNode(n.name.s);
+		classes.put(n.name.s, new ClassNode(n.name.s));
+		SetClassInUse(n.name.s);
 		
 		for(util.List<VarDecl> v = n.varList; v != null; v = v.tail){
-			typeList.add(v.head.accept(this).type);
-			varList.add(v.head.accept(this));
+			LlvmValue field = v.head.accept(this);
+			GetClassInUse().AddField(field.toString(), field.type); //VarDecl tem de retornar seu tipo e seu nome
+		}
+
+	    	// Percorre n.methodList visitando cada m������todo
+		
+		for(util.List<MethodDecl> m = n.methodList; m != null; m = m.tail){
+			m.head.accept(this);
 		}
 		
-		classEnv.AddClassType(new LlvmStructure(typeList));
-		classEnv.AddVarList(varList);
+		classEnv = null;
+		methodEnv = null;
 		
-		
-		classes.put(n.name.s, classEnv);
-	    	// Percorre n.methodList visitando cada m������todo
 		return null;
 	}
 	
 		public LlvmValue visit(ClassDeclExtends n){return null;}
-		public LlvmValue visit(VarDecl n){return null;}
-		public LlvmValue visit(Formal n){return null;}
-		public LlvmValue visit(MethodDecl n){return null;}
-		public LlvmValue visit(IdentifierType n){return null;}
-		public LlvmValue visit(IntArrayType n){return null;}
-		public LlvmValue visit(BooleanType n){return null;}
-		public LlvmValue visit(IntegerType n){return null;}
+		public LlvmValue visit(VarDecl n){
+			return new LlvmNamedValue(n.name.s, n.type.accept(this).type);
+		}
+		
+		public LlvmValue visit(MethodDecl n){
+			GetClassInUse().AddMethod(n.name.s, new MethodNode(n.name.s));
+			SetMethodInUse(n.name.s);
+			for(util.List<VarDecl> v = n.locals; v != null; v = v.tail){
+				LlvmValue local = v.head.accept(this);
+				GetMethodInUse().AddLocal(local.toString(), local);
+			}
+			for(util.List<Formal> f = n.formals; f != null; f = f.tail){
+				LlvmValue formal = f.head.accept(this);
+				GetMethodInUse().AddParam(formal.toString(), formal);
+			}
+			return null;
+		}
+		public LlvmValue visit(IdentifierType n){
+			return new LlvmNamedValue("id", LlvmPrimitiveType.I8);
+		}
+		public LlvmValue visit(IntArrayType n){
+			return new LlvmNamedValue("int[]", LlvmPrimitiveType.I32p);
+		}
+		public LlvmValue visit(BooleanType n){
+			return new LlvmNamedValue("BooleanType", LlvmPrimitiveType.I1);
+		}
+		
+		public LlvmValue visit(IntegerType n){
+			return new LlvmNamedValue("IntegerType", LlvmPrimitiveType.I32);
+		}
+		
+		public LlvmValue visit(Formal n){
+			return new LlvmNamedValue(n.name.s, n.type.accept(this).type);
+		}
+}
+
+class Field{
+	LlvmType _type;
+	int _index;
+	
+	public Field(LlvmType type, int index){
+		_type = type;
+		_index = index;
+	}
 }
 
 class ClassNode extends LlvmType {
 	String _name;
 	LlvmStructure _classSize;
-	List<LlvmValue> _varList;
-	List<MethodNode> _methodList;
-	
-	public ClassNode (String nameClass, LlvmStructure classType, List<LlvmValue> varList){
-		_name = nameClass;
-		_classSize = classType;
-		_varList = varList;
-		_methodList = new ArrayList<MethodNode>();
-	}
+	Map<String, Field> _classFields = new HashMap<String, Field>();
+	Map<String, MethodNode> _methodList = new HashMap<String, MethodNode>();;
+	int counter = 0;
+
 	public ClassNode(String nameClass){
 		_name = nameClass;
 	}
@@ -559,24 +617,47 @@ class ClassNode extends LlvmType {
 		_classSize = classType;
 	}
 	
-	public void AddVarList(List<LlvmValue> varList){
-		_varList = varList;
+	public void AddMethod(String methodName, MethodNode m){
+		_methodList.put(methodName, m);
 	}
 	
-	void AddMethod(MethodNode m){
-		_methodList.add(m);
+	//Adiciona um campo na classe
+	public void AddField(String name, LlvmType type){
+		_classFields.put(name, new Field(type, counter));
+		counter++;
+	}
+	
+	public Field GetField(String fieldName){
+		return _classFields.get(fieldName);
+	}
+	
+	public MethodNode GetMethod(String methodName){
+		return _methodList.get(methodName);
+	}
+	
+	public LlvmStructure GetClassType(){
+		return _classSize;
 	}
 }
 
 class MethodNode {
 	String _name;
-	List<LlvmValue> _args;
-	List<LlvmValue> _locals;
-	
-	public MethodNode(String name, List<LlvmValue> args, List<LlvmValue> locals){
+	Map<String, LlvmValue> _params = new HashMap<String, LlvmValue>();
+	Map<String, LlvmValue> _locals = new HashMap<String, LlvmValue>();
+	public MethodNode(String name){
 		_name = name;
-		_args = args;
-		_locals=locals;
+	}
+	public void AddParam(String paramName, LlvmValue param){
+		_params.put(paramName, param);
+	}
+	public void AddLocal(String localName, LlvmValue local){
+		_locals.put(localName, local);
+	}
+	public LlvmValue GetParam(String paramName){
+		return _params.get(paramName);
+	}
+	public LlvmValue GetLocal(String localName){
+		return _locals.get(localName);
 	}
 	
 }
