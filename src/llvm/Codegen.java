@@ -39,6 +39,7 @@ import semant.Env;
 import syntaxtree.*;
 import llvmast.*;
 
+import java.sql.Time;
 import java.util.*;
 
 public class Codegen extends VisitorAdapter{
@@ -169,6 +170,11 @@ public class Codegen extends VisitorAdapter{
 	
 	//Function CLASSDECLSIMPLE:
 	public LlvmValue visit(ClassDeclSimple n){
+		symTab.SetClassInUse(n.name.s);
+		for(LlvmType t : symTab.GetClassInUse()._classStructure.typeList){
+			
+		}
+		
 		/*
 		util.List<MethodDecl> methodList = n.methodList;
 		util.List<VarDecl> varList = n.varList;
@@ -199,6 +205,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function METHODDECL:
 	public LlvmValue visit(MethodDecl n){
+		symTab.SetMethodInUse(n.name.s);
 		List<LlvmValue> listaArgs = new ArrayList<LlvmValue>();
 		for (util.List<Formal> c = n.formals; c != null; c = c.tail)
 		{
@@ -302,6 +309,8 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function ASSIGN:
 	public LlvmValue visit(Assign n){
+		
+		
 		/*
 		Identifier var = n.var;
 		Exp exp = n.exp;
@@ -313,6 +322,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function ARRAYASSIGN
 	public LlvmValue visit(ArrayAssign n){
+		
 		/*
 		Identifier var = n.var;
 		Exp index = n.index;
@@ -382,6 +392,8 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function ARRAYLENGTH:
 	public LlvmValue visit(ArrayLength n){
+		
+		
 		/*
 		Exp array = n.array;
 		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
@@ -392,6 +404,8 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function CALL:
 	public LlvmValue visit(Call n){
+		
+		
 		/*
 		Exp object = n.object;
 		Identifier method = n.method;
@@ -441,12 +455,14 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function NEWOBJECT:
 	public LlvmValue visit(NewObject n){
-		/*
-		Identifier className = n.className;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmNewObject(exp,LlvmPrimitiveType.I32, className));
-		return exp;
-		*/
+		LlvmValue sizeValue = new LlvmIntegerLiteral(symTab.classes.get(n.className.s)._classStructure.sizeByte);
+		LlvmRegister lhsMalloc = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I8));
+		List<LlvmValue> args = new LinkedList<LlvmValue>();
+		args.add(sizeValue);
+		assembler.add(new LlvmCall(lhsMalloc, lhsMalloc.type, "@malloc", args));
+		LlvmRegister lhsBitCast = new LlvmRegister(n.className.accept(this).type);
+		assembler.add(new LlvmBitcast(lhsBitCast, lhsMalloc, lhsBitCast.type));
+		
 		return null;
 	}
 	//Function NOT:
@@ -534,11 +550,14 @@ class SymTab extends VisitorAdapter{
 		classes.put(n.name.s, new ClassNode(n.name.s));
 		SetClassInUse(n.name.s);
 		
+		List<LlvmType> listaTipos = new LinkedList<LlvmType>();
+		
 		for(util.List<VarDecl> v = n.varList; v != null; v = v.tail){
 			LlvmValue field = v.head.accept(this);
 			GetClassInUse().AddField(field.toString(), field.type); //VarDecl tem de retornar seu tipo e seu nome
+			listaTipos.add(field.type);
 		}
-
+		GetClassInUse().AddClassType(new LlvmStructure(listaTipos));
 	    	// Percorre n.methodList visitando cada m������todo
 		
 		for(util.List<MethodDecl> m = n.methodList; m != null; m = m.tail){
@@ -600,7 +619,7 @@ class Field{
 
 class ClassNode extends LlvmType {
 	String _name;
-	LlvmStructure _classSize;
+	LlvmStructure _classStructure;
 	Map<String, Field> _classFields = new HashMap<String, Field>();
 	Map<String, MethodNode> _methodList = new HashMap<String, MethodNode>();;
 	int counter = 0;
@@ -610,7 +629,7 @@ class ClassNode extends LlvmType {
 	}
 	
 	public void AddClassType(LlvmStructure classType){
-		_classSize = classType;
+		_classStructure = classType;
 	}
 	
 	public void AddMethod(String methodName, MethodNode m){
@@ -632,7 +651,7 @@ class ClassNode extends LlvmType {
 	}
 	
 	public LlvmStructure GetClassType(){
-		return _classSize;
+		return _classStructure;
 	}
 }
 
