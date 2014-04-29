@@ -220,11 +220,10 @@ public class Codegen extends VisitorAdapter{
 		}
 		
 		for(util.List<VarDecl> v = n.locals; v != null; v = v.tail){
-			LlvmValue r = v.head.accept(this);
-			assembler.add(new LlvmAlloca(r, r.type, null));
+			v.head.accept(this);
 		}
 		
-		for(util.List<Statement> s = n.body; n != null; s = s.tail){
+		for(util.List<Statement> s = n.body; s != null; s = s.tail){
 			s.head.accept(this);
 		}
 		
@@ -234,9 +233,7 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(Formal n){
 		LlvmValue addr = new LlvmNamedValue(n.name.toString(), n.type.accept(this).type);
 		assembler.add(new LlvmAlloca(addr, n.type.accept(this).type, null));
-		assembler.add(new LlvmStore(n.accept(this) ,addr));
-
-		return null;
+		return addr;
 	}
 	//Function INTARRAYTYPE:
 	public LlvmValue visit(IntArrayType n){

@@ -14,6 +14,7 @@ class k
 	public int TestMethod(int argsa, boolean argsb){
 		int dd;
 		int ee;
+		ee = 4;
 		return 3;
 	}
 	
