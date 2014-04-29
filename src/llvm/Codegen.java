@@ -176,6 +176,10 @@ public class Codegen extends VisitorAdapter{
 		assembler.add(new LlvmConstantDeclaration("%class."+n.name.s, 
 				new LlvmStructure(symTab.GetClassInUse()._classStructure.typeList).toString()));
 
+		for (util.List<MethodDecl> m = n.methodList; m != null; m = m.tail){
+			m.head.accept(this);
+		}
+		
 		return null;
 
 	}
@@ -205,7 +209,7 @@ public class Codegen extends VisitorAdapter{
 		{
 			listaArgs.add(c.head.accept(this));
 		}
-		LlvmInstruction definition = new LlvmDefine(n.name.toString(), n.returnType.accept(this).type, listaArgs);
+		LlvmInstruction definition = new LlvmDefine("@__" + n.name.toString() + "_" + symTab.GetClassInUse()._name , n.returnType.accept(this).type, listaArgs);
 		assembler.add(definition);
 		
 		for(LlvmValue v : listaArgs){
