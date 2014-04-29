@@ -213,7 +213,7 @@ public class Codegen extends VisitorAdapter{
 		assembler.add(definition);
 		
 		for(LlvmValue v : listaArgs){
-			LlvmValue addr = new LlvmNamedValue(v.toString(), v.type);
+			LlvmValue addr = new LlvmRegister(v.type);
 			
 			assembler.add(new LlvmAlloca(addr, v.type, new LinkedList<LlvmValue>()));
 			assembler.add(new LlvmStore(v, addr));
@@ -232,7 +232,7 @@ public class Codegen extends VisitorAdapter{
 	//Function FORMAL:
 	public LlvmValue visit(Formal n){
 		LlvmValue addr = new LlvmNamedValue(n.name.toString(), n.type.accept(this).type);
-		assembler.add(new LlvmAlloca(addr, n.type.accept(this).type, new LinkedList<LlvmValue>()));
+		//assembler.add(new LlvmAlloca(addr, n.type.accept(this).type, new LinkedList<LlvmValue>()));
 		return addr;
 	}
 	//Function INTARRAYTYPE:
@@ -242,7 +242,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function BOOLEANTYPE:
 	public LlvmValue visit(BooleanType n){
-		return new LlvmNamedValue("", LlvmPrimitiveType.I8);
+		return new LlvmNamedValue("", LlvmPrimitiveType.I1);
 	}
 	//Function INTEGERTYPE:
 	public LlvmValue visit(IntegerType n){
