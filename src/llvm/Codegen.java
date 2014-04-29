@@ -169,15 +169,13 @@ public class Codegen extends VisitorAdapter{
 	
 	//Function CLASSDECLSIMPLE:
 	public LlvmValue visit(ClassDeclSimple n){
-		/*
-		util.List<MethodDecl> methodList = n.methodList;
-		util.List<VarDecl> varList = n.varList;
-		Identifier name = n.name;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		assembler.add(new LlvmClassDeclSimple(exp, LlvmPrimitiveType.I32, name, (List<VarDecl>) varList, (List<MethodDecl>) methodList));
-		return exp;
-		*/
-		return null;
+		
+		symTab.SetClassInUse(n.name.s);
+		
+		assembler.add(new LlvmConstantDeclaration("%class."+n.name.s, 
+				new LlvmStructure(symTab.GetClassInUse()._classSize.typeList).toString()));
+
+		return null;	
 	}
 	//Function CLASSDECLEXTENDS:
 	public LlvmValue visit(ClassDeclExtends n){
