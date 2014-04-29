@@ -205,6 +205,9 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(MethodDecl n){
 		symTab.SetMethodInUse(n.name.s);
 		List<LlvmValue> listaArgs = new ArrayList<LlvmValue>();
+		
+		listaArgs.add(new LlvmNamedValue("%this", new LlvmPointer(symTab.GetClassInUse())));
+		
 		for (util.List<Formal> c = n.formals; c != null; c = c.tail)
 		{
 			listaArgs.add(c.head.accept(this));
@@ -213,8 +216,7 @@ public class Codegen extends VisitorAdapter{
 		assembler.add(definition);
 		
 		for(LlvmValue v : listaArgs){
-			LlvmValue addr = new LlvmRegister(v.type);
-			
+			LlvmRegister addr = new LlvmRegister(v.type);
 			assembler.add(new LlvmAlloca(addr, v.type, new LinkedList<LlvmValue>()));
 			assembler.add(new LlvmStore(v, addr));
 		}
@@ -431,12 +433,9 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function THIS:
 	public LlvmValue visit(This n){
-		/*
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmThis(exp,LlvmPrimitiveType.I32));
+		LlvmPointer t = new LlvmPointer(symTab.GetClassInUse());
+		LlvmRegister exp = new LlvmRegister(t.content);
 		return exp;
-		*/
-		return null;
 	}
 	//Function NEWARRAY:
 	public LlvmValue visit(NewArray n){
@@ -615,13 +614,14 @@ class ClassNode extends LlvmType {
 	Map<String, Field> _classFields = new HashMap<String, Field>();
 	Map<String, MethodNode> _methodList = new HashMap<String, MethodNode>();;
 	int counter = 0;
-
+	
 	public ClassNode(String nameClass){
 		_name = nameClass;
 	}
 	
 	public void AddClassType(LlvmStructure classType){
 		_classStructure = classType;
+		
 	}
 	
 	public void AddMethod(String methodName, MethodNode m){
@@ -644,6 +644,10 @@ class ClassNode extends LlvmType {
 	
 	public LlvmStructure GetClassType(){
 		return _classStructure;
+	}
+	
+	public String toString(){
+		return "%class." + _name;
 	}
 }
 
