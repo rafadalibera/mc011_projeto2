@@ -198,7 +198,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function VARDECL:
 	public LlvmValue visit(VarDecl n){
-		assembler.add(new LlvmAlloca(n.name.accept(this), n.type.accept(this).type, null));
+		assembler.add(new LlvmAlloca(n.name.accept(this), n.type.accept(this).type, new LinkedList<LlvmValue>()));
 		return null;
 	}
 	//Function METHODDECL:
@@ -215,7 +215,7 @@ public class Codegen extends VisitorAdapter{
 		for(LlvmValue v : listaArgs){
 			LlvmValue addr = new LlvmNamedValue(v.toString(), v.type);
 			
-			assembler.add(new LlvmAlloca(addr, v.type, null));
+			assembler.add(new LlvmAlloca(addr, v.type, new LinkedList<LlvmValue>()));
 			assembler.add(new LlvmStore(v, addr));
 		}
 		
@@ -232,7 +232,7 @@ public class Codegen extends VisitorAdapter{
 	//Function FORMAL:
 	public LlvmValue visit(Formal n){
 		LlvmValue addr = new LlvmNamedValue(n.name.toString(), n.type.accept(this).type);
-		assembler.add(new LlvmAlloca(addr, n.type.accept(this).type, null));
+		assembler.add(new LlvmAlloca(addr, n.type.accept(this).type, new LinkedList<LlvmValue>()));
 		return addr;
 	}
 	//Function INTARRAYTYPE:
@@ -469,13 +469,10 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function IDENTIFIER:
 	public LlvmValue visit(Identifier n){
-		/*
+		
 		String s = n.s;
 		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmIdentifier(exp,LlvmPrimitiveType.I32, s));
 		return exp;
-		*/
-		return null;
 	}
 }
 
