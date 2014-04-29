@@ -463,7 +463,7 @@ public class Codegen extends VisitorAdapter{
 		LlvmRegister lhsBitCast = new LlvmRegister(n.className.accept(this).type);
 		assembler.add(new LlvmBitcast(lhsBitCast, lhsMalloc, lhsBitCast.type));
 		
-		return null;
+		return lhsBitCast;
 	}
 	//Function NOT:
 	public LlvmValue visit(Not n) {

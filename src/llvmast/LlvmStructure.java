@@ -1,4 +1,4 @@
-package llvmast;
+ahnpackage llvmast;
 import java.util.*;
 
 import syntaxtree.VarDecl;
