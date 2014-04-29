@@ -210,15 +210,21 @@ public class Codegen extends VisitorAdapter{
 		
 		for (util.List<Formal> c = n.formals; c != null; c = c.tail)
 		{
-			listaArgs.add(c.head.accept(this));
+		
+				listaArgs.add(c.head.accept(this));
+			
 		}
 		LlvmInstruction definition = new LlvmDefine("@__" + n.name.toString() + "_" + symTab.GetClassInUse()._name , n.returnType.accept(this).type, listaArgs);
 		assembler.add(definition);
 		
+		boolean vai = false;
 		for(LlvmValue v : listaArgs){
+			if(vai){
 			LlvmRegister addr = new LlvmRegister(v.type);
 			assembler.add(new LlvmAlloca(addr, v.type, new LinkedList<LlvmValue>()));
 			assembler.add(new LlvmStore(v, addr));
+			}
+			vai = true;
 		}
 		
 		for(util.List<VarDecl> v = n.locals; v != null; v = v.tail){
