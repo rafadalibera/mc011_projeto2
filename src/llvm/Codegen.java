@@ -377,14 +377,16 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function ARRAYLOOKUP:
 	public LlvmValue visit(ArrayLookup n){
-		/*
-		Exp array = n.array;
-		Exp index = n.index;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmArrayLookup(exp, LlvmPrimitiveType.I32, array, index));
-		return exp;
-		*/
-		return null;
+		
+		LlvmRegister addr = new LlvmRegister(LlvmPrimitiveType.I32p);
+		new LlvmTimes (addr, LlvmPrimitiveType.I32, n.index.accept(this), addr);
+		
+		new LlvmPlus(addr,LlvmPrimitiveType.I32,addr, n.array.accept(this));
+		
+		LlvmRegister ret = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmLoad(ret, addr));
+		
+		return ret;
 	}
 	//Function ARRAYLENGTH:
 	public LlvmValue visit(ArrayLength n){
