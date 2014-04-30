@@ -319,15 +319,14 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function ARRAYASSIGN
 	public LlvmValue visit(ArrayAssign n){
+
+		LlvmRegister addr = new LlvmRegister(LlvmPrimitiveType.I32p);
+		new LlvmTimes (addr, LlvmPrimitiveType.I32, n.index.accept(this), addr);
 		
-		/*
-		Identifier var = n.var;
-		Exp index = n.index;
-		Exp value = n.value;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmArrayAssign(exp,LlvmPrimitiveType.I32, var, index, value));
-		return exp;
-		*/
+		new LlvmPlus(addr,LlvmPrimitiveType.I32,addr, n.var.accept(this));
+		
+		assembler.add(new LlvmStore(n.value.accept(this), addr));
+		
 		return null;
 	}
 	// Function AND:
