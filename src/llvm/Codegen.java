@@ -305,6 +305,7 @@ public class Codegen extends VisitorAdapter{
 		assembler.add(new LlvmLabel(labelLoop));
 		
 		assembler.add(new LlvmBranch(n.condition.accept(this), labelBegin, labelEnd));
+		assembler.add(new LlvmLabel(labelBegin));
 		n.body.accept(this);
 		assembler.add(new LlvmBranch(labelLoop));
 		

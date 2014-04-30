@@ -21,6 +21,7 @@ define i32 @__TestMethod_k(%class.k * %this, i32 argsa, i1 argsb) {
 label0:
   %tmp6 = icmp slt i32 %ee_temp, 7
   br i1 %tmp6, label %label1, label %label2
+label1:
   %tmp7 = mul i32 %dd_temp, %ee_temp
   store i32 %tmp7, i32 * %dd_temp
   %tmp8 = add i32 %ee_temp, 1
