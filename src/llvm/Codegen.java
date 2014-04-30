@@ -325,7 +325,7 @@ public class Codegen extends VisitorAdapter{
 		assembler.add(new LlvmStore(n.exp.accept(this), v._register));
 		return null;
 	}
-	//Function ARRAYASSIGN
+	//Function ARRAYASSIGN:
 	public LlvmValue visit(ArrayAssign n){
 		MethodVariable v = symTab.GetMethodInUse().GetVariable(n.var.s);
 		
@@ -333,7 +333,11 @@ public class Codegen extends VisitorAdapter{
 		LlvmRegister reg = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
 		LlvmRegister regAccess = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
 		
-		new LlvmTimes (reg, new LlvmPointer(LlvmPrimitiveType.I32), n.index.accept(this), new LlvmIntegerLiteral(8));
+		LlvmRegister temp = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
+		
+		assembler.add(new LlvmPlus(temp, new LlvmPointer(LlvmPrimitiveType.I32), n.index.accept(this), new LlvmIntegerLiteral(1)));
+		
+		new LlvmTimes (reg, new LlvmPointer(LlvmPrimitiveType.I32), temp, new LlvmIntegerLiteral(4));
 		
 		new LlvmPlus(regAccess, new LlvmPointer(LlvmPrimitiveType.I32), regBase, reg);
 		
@@ -390,13 +394,17 @@ public class Codegen extends VisitorAdapter{
 	//Function ARRAYLOOKUP:
 	public LlvmValue visit(ArrayLookup n){
 		
-		LlvmRegister regBase = (LlvmRegister)n.array.accept(this);
+		LlvmValue regBase = n.array.accept(this);
 		LlvmRegister reg = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
 		LlvmRegister regAccess = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
 		
-		new LlvmTimes (reg, new LlvmPointer(LlvmPrimitiveType.I32), n.index.accept(this), new LlvmIntegerLiteral(8));
+		LlvmRegister temp = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
 		
-		new LlvmPlus(regAccess, new LlvmPointer(LlvmPrimitiveType.I32), regBase, reg);
+		assembler.add(new LlvmPlus(temp, new LlvmPointer(LlvmPrimitiveType.I32), n.index.accept(this), new LlvmIntegerLiteral(1)));
+		
+		assembler.add(new LlvmTimes (reg, new LlvmPointer(LlvmPrimitiveType.I32), temp, new LlvmIntegerLiteral(4)));
+		
+		assembler.add(new LlvmPlus(regAccess, new LlvmPointer(LlvmPrimitiveType.I32), regBase, reg));
 		
 		LlvmRegister ret = new LlvmRegister(LlvmPrimitiveType.I32);
 		
@@ -407,28 +415,26 @@ public class Codegen extends VisitorAdapter{
 	//Function ARRAYLENGTH:
 	public LlvmValue visit(ArrayLength n){
 		
+		LlvmValue regBase = n.array.accept(this);
 		
-		/*
-		Exp array = n.array;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmArrayLength(exp, LlvmPrimitiveType.I32, array));
-		return exp;
-		*/
-		return null;
+		LlvmRegister ret = new LlvmRegister(LlvmPrimitiveType.I32);
+		
+		assembler.add(new LlvmLoad(ret, regBase));
+		
+		return ret;
 	}
 	//Function CALL:
 	public LlvmValue visit(Call n){
+		List<LlvmValue> args = new ArrayList<LlvmValue>();
 		
+		for(util.List<Exp> s = n.actuals; s != null; s = s.tail){
+			args.add(s.head.accept(this));
+		}
 		
-		/*
-		Exp object = n.object;
-		Identifier method = n.method;
-		util.List<Exp> actuals = n.actuals;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmCall(exp, LlvmPrimitiveType.I32, object, method, actuals));
-		return exp;
-		*/
-		return null;
+		LlvmRegister regResultado = new LlvmRegister(symTab.GetMethodInUse()._returnType.type);
+		assembler.add(new LlvmCall(regResultado, regResultado.type, "@__" + symTab.GetMethodInUse()._name + "_" + symTab.GetClassInUse()._name, args));
+		
+		return regResultado;
 	}
 	//Function TRUE:
 	public LlvmValue visit(True n){
@@ -450,17 +456,22 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function THIS:
 	public LlvmValue visit(This n){
-		LlvmPointer t = new LlvmPointer(symTab.GetClassInUse());
-		LlvmRegister exp = new LlvmRegister(t.content);
-		return exp;
+		
+		return n.type.accept(this);
 	}
 	//Function NEWARRAY:
 	public LlvmValue visit(NewArray n){
-		LlvmRegister tam = (LlvmRegister)n.size.accept(this);
+		LlvmValue pretam = n.size.accept(this); 
+		
+		LlvmRegister tam = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
+		
+		assembler.add(new LlvmPlus(tam, tam.type, pretam, new LlvmIntegerLiteral(1)));
 		
 		LlvmRegister mallocares = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
 		
 		assembler.add(new LlvmMalloc(mallocares, LlvmPrimitiveType.I32, tam));
+		
+		assembler.add(new LlvmStore(pretam, mallocares));
 		
 		return mallocares;
 	}
