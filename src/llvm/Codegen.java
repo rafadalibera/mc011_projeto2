@@ -247,8 +247,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function INTARRAYTYPE:
 	public LlvmValue visit(IntArrayType n){
-		//return new LlvmNamedValue("", LlvmPrimitiveType.I32);
-		return null;
+		return new LlvmNamedValue("", LlvmPrimitiveType.I32p);
 	}
 	//Function BOOLEANTYPE:
 	public LlvmValue visit(BooleanType n){
