@@ -198,34 +198,41 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function VARDECL:
 	public LlvmValue visit(VarDecl n){
-		assembler.add(new LlvmAlloca(n.name.accept(this), n.type.accept(this).type, new LinkedList<LlvmValue>()));
+		LlvmRegister reg = new LlvmRegister(n.type.accept(this).type);
+		reg.type = new LlvmPointer(reg.type);
+		
+		symTab.GetMethodInUse().SetRegisterVariable(n.name.s, reg);
+		
+		assembler.add(new LlvmAlloca(reg, n.type.accept(this).type, new LinkedList<LlvmValue>()));
+		
 		return null;
 	}
 	//Function METHODDECL:
 	public LlvmValue visit(MethodDecl n){
 		symTab.SetMethodInUse(n.name.s);
 		List<LlvmValue> listaArgs = new ArrayList<LlvmValue>();
-		
+		List<String> listaArgsString = new ArrayList<String>();
 		listaArgs.add(new LlvmNamedValue("%this", new LlvmPointer(symTab.GetClassInUse())));
 		
 		for (util.List<Formal> c = n.formals; c != null; c = c.tail)
 		{
 		
 				listaArgs.add(c.head.accept(this));
+				listaArgsString.add(c.head.name.s);
 			
 		}
 		LlvmInstruction definition = new LlvmDefine("@__" + n.name.toString() + "_" + symTab.GetClassInUse()._name , n.returnType.accept(this).type, listaArgs);
 		assembler.add(definition);
 		
-		boolean vai = false;
-		for(LlvmValue v : listaArgs){
-			if(vai){
-				LlvmRegister addr = new LlvmRegister(v.type);
-				assembler.add(new LlvmAlloca(addr, v.type, new LinkedList<LlvmValue>()));
-				assembler.add(new LlvmStore(v, addr));
-			}
-			vai = true;
+		
+		for(int i = 1; i < listaArgs.size(); i++){
+			LlvmRegister addr = new LlvmRegister(listaArgs.get(i).type);
+			addr.type = new LlvmPointer(addr.type);
+			symTab.GetMethodInUse().SetRegisterVariable(listaArgsString.get(i-1), addr); 
+			assembler.add(new LlvmAlloca(addr, listaArgs.get(i).type, new LinkedList<LlvmValue>()));
+			assembler.add(new LlvmStore(listaArgs.get(i), addr));
 		}
+		
 		
 		for(util.List<VarDecl> v = n.locals; v != null; v = v.tail){
 			v.head.accept(this);
@@ -314,7 +321,8 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function ASSIGN:
 	public LlvmValue visit(Assign n){
-		assembler.add(new LlvmStore(n.exp.accept(this), n.var.accept(this)));
+		MethodVariable v = symTab.GetMethodInUse().GetVariable(n.var.s);
+		assembler.add(new LlvmStore(n.exp.accept(this), v._register));
 		return null;
 	}
 	//Function ARRAYASSIGN
@@ -422,9 +430,15 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(False n){
 		return new LlvmBool(0);
 	}
-	//Function IDENTIFIEREXP
+	//Function IDENTIFIEREXP:
 	public LlvmValue visit(IdentifierExp n){
-		return new LlvmRegister("%"+n.name.s+"_temp", n.type.accept(this).type);
+		MethodVariable v = symTab.GetMethodInUse().GetVariable(n.name.s);
+		
+		LlvmRegister ret = new LlvmRegister(v._variable.type);
+		
+		assembler.add(new LlvmLoad(ret, v._register));
+		
+		return ret;
 	}
 	//Function THIS:
 	public LlvmValue visit(This n){
@@ -463,10 +477,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function IDENTIFIER:
 	public LlvmValue visit(Identifier n){
-		
-		String s = n.s;
-		LlvmRegister exp = new LlvmRegister("%"+n.s+"_temp", LlvmPrimitiveType.I32);
-		return exp;
+		return symTab.GetMethodInUse().GetVariable(n.s)._register;
 	}
 }
 
@@ -566,11 +577,11 @@ class SymTab extends VisitorAdapter{
 			SetMethodInUse(n.name.s);
 			for(util.List<VarDecl> v = n.locals; v != null; v = v.tail){
 				LlvmValue local = v.head.accept(this);
-				GetMethodInUse().AddLocal(local.toString(), local);
+				GetMethodInUse().AddVariable(local.toString(), local);
 			}
 			for(util.List<Formal> f = n.formals; f != null; f = f.tail){
 				LlvmValue formal = f.head.accept(this);
-				GetMethodInUse().AddParam(formal.toString(), formal);
+				GetMethodInUse().AddVariable(formal.toString(), formal);
 			}
 			return null;
 		}
@@ -646,27 +657,36 @@ class ClassNode extends LlvmType {
 	}
 }
 
+class MethodVariable{
+	public LlvmValue _variable;
+	public LlvmRegister _register;
+	
+	public MethodVariable(LlvmValue variable){
+		_variable = variable;
+	}
+	
+	
+}
+
 class MethodNode {
 	String _name;
 	LlvmValue _returnType;
-	Map<String, LlvmValue> _params = new HashMap<String, LlvmValue>();
-	Map<String, LlvmValue> _locals = new HashMap<String, LlvmValue>();
+	Map<String, MethodVariable> _variables = new HashMap<String, MethodVariable>();
 	public MethodNode(String name, LlvmValue returnType){
 		_name = name;
 		_returnType = returnType;
 	}
-	public void AddParam(String paramName, LlvmValue param){
-		_params.put(paramName, param);
+	public void AddVariable(String paramName, LlvmValue param){
+		_variables.put(paramName, new MethodVariable(param));
 	}
-	public void AddLocal(String localName, LlvmValue local){
-		_locals.put(localName, local);
+	public MethodVariable GetVariable(String paramName){
+		return _variables.get(paramName);
 	}
-	public LlvmValue GetParam(String paramName){
-		return _params.get(paramName);
+	
+	public void SetRegisterVariable(String paramName, LlvmRegister reg){
+		GetVariable(paramName)._register = reg;
 	}
-	public LlvmValue GetLocal(String localName){
-		return _locals.get(localName);
-	}
+	
 	
 	public LlvmValue GetReturnType(){
 		return _returnType;
