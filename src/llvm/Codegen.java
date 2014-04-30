@@ -470,7 +470,7 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(Identifier n){
 		
 		String s = n.s;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
+		LlvmRegister exp = new LlvmRegister("%"+n.s+"_temp", LlvmPrimitiveType.I32);
 		return exp;
 	}
 }
