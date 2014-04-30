@@ -390,15 +390,17 @@ public class Codegen extends VisitorAdapter{
 	//Function ARRAYLOOKUP:
 	public LlvmValue visit(ArrayLookup n){
 		
+		LlvmRegister regBase = (LlvmRegister)n.array.accept(this);
+		LlvmRegister reg = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
+		LlvmRegister regAccess = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
 		
+		new LlvmTimes (reg, new LlvmPointer(LlvmPrimitiveType.I32), n.index.accept(this), new LlvmIntegerLiteral(8));
 		
-		LlvmRegister addr = new LlvmRegister(LlvmPrimitiveType.I32p);
-		new LlvmTimes (addr, LlvmPrimitiveType.I32, n.index.accept(this), addr);
-		
-		new LlvmPlus(addr,LlvmPrimitiveType.I32,addr, n.array.accept(this));
+		new LlvmPlus(regAccess, new LlvmPointer(LlvmPrimitiveType.I32), regBase, reg);
 		
 		LlvmRegister ret = new LlvmRegister(LlvmPrimitiveType.I32);
-		assembler.add(new LlvmLoad(ret, addr));
+		
+		assembler.add(new LlvmLoad(ret, regAccess));
 		
 		return ret;
 	}
@@ -454,13 +456,13 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function NEWARRAY:
 	public LlvmValue visit(NewArray n){
-		/*
-		Exp size = n.size;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmNewArray(exp,LlvmPrimitiveType.I32, size));
-		return exp;
-		*/
-		return null;
+		LlvmRegister tam = (LlvmRegister)n.size.accept(this);
+		
+		LlvmRegister mallocares = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
+		
+		assembler.add(new LlvmMalloc(mallocares, LlvmPrimitiveType.I32, tam));
+		
+		return mallocares;
 	}
 	//Function NEWOBJECT:
 	public LlvmValue visit(NewObject n){
