@@ -327,13 +327,17 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function ARRAYASSIGN
 	public LlvmValue visit(ArrayAssign n){
-
-		LlvmRegister addr = new LlvmRegister(LlvmPrimitiveType.I32p);
-		new LlvmTimes (addr, LlvmPrimitiveType.I32, n.index.accept(this), addr);
+		MethodVariable v = symTab.GetMethodInUse().GetVariable(n.var.s);
 		
-		new LlvmPlus(addr,LlvmPrimitiveType.I32,addr, n.var.accept(this));
+		LlvmRegister regBase = v._register;
+		LlvmRegister reg = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
+		LlvmRegister regAccess = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
 		
-		assembler.add(new LlvmStore(n.value.accept(this), addr));
+		new LlvmTimes (reg, new LlvmPointer(LlvmPrimitiveType.I32), n.index.accept(this), new LlvmIntegerLiteral(8));
+		
+		new LlvmPlus(regAccess, new LlvmPointer(LlvmPrimitiveType.I32), regBase, reg);
+		
+		assembler.add(new LlvmStore(n.value.accept(this), regAccess));
 		
 		return null;
 	}
