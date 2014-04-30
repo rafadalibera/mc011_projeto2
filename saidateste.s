@@ -28,6 +28,6 @@ label1:
   store i32 %tmp8, i32 * %ee_temp
   br label %label0
 label2:
-  ret i32 3
+  ret i32 %dd_temp
 declare i32 @printf (i8 *, ...)
 declare i8 * @malloc (i32)
