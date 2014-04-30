@@ -220,9 +220,9 @@ public class Codegen extends VisitorAdapter{
 		boolean vai = false;
 		for(LlvmValue v : listaArgs){
 			if(vai){
-			LlvmRegister addr = new LlvmRegister(v.type);
-			assembler.add(new LlvmAlloca(addr, v.type, new LinkedList<LlvmValue>()));
-			assembler.add(new LlvmStore(v, addr));
+				LlvmRegister addr = new LlvmRegister(v.type);
+				assembler.add(new LlvmAlloca(addr, v.type, new LinkedList<LlvmValue>()));
+				assembler.add(new LlvmStore(v, addr));
 			}
 			vai = true;
 		}
@@ -234,6 +234,8 @@ public class Codegen extends VisitorAdapter{
 		for(util.List<Statement> s = n.body; s != null; s = s.tail){
 			s.head.accept(this);
 		}
+		
+		assembler.add(new LlvmRet(n.returnExp.accept(this)));
 		
 		return null;
 	}
@@ -312,15 +314,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function ASSIGN:
 	public LlvmValue visit(Assign n){
-		
-		
-		/*
-		Identifier var = n.var;
-		Exp exp = n.exp;
-		LlvmRegister exp2 = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmAssign(exp,LlvmPrimitiveType.I32, var, exp));
-		return exp2;
-		*/
+		assembler.add(new LlvmStore(n.exp.accept(this), n.var.accept(this)));
 		return null;
 	}
 	//Function ARRAYASSIGN
