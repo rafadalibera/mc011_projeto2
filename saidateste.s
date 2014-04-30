@@ -16,16 +16,16 @@ define i32 @__TestMethod_k(%class.k * %this, i32 argsa, i1 argsb) {
   store i1 argsb, i1 * %tmp5
   %dd_temp = alloca i32
   %ee_temp = alloca i32
+  store i32 0, i32 * %dd_temp
   store i32 3, i32 * %ee_temp
-  %tmp6 = icmp eq i32 null, 2
- %tmp7 = mul i32 %tmp6, %tmp6
-  br i1 %tmp7, label %label0, label %label1
 label0:
-  store i32 3, i32 * %dd_temp
-  br label %label2
-label1:
-  store i32 2, i32 * %dd_temp
-  br label %label2
+  %tmp6 = icmp slt i32 %ee_temp, 7
+  br i1 %tmp6, label %label1, label %label2
+  %tmp7 = mul i32 %dd_temp, %ee_temp
+  store i32 %tmp7, i32 * %dd_temp
+  %tmp8 = add i32 %ee_temp, 1
+  store i32 %tmp8, i32 * %ee_temp
+  br label %label0
 label2:
   ret i32 3
 declare i32 @printf (i8 *, ...)

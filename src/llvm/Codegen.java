@@ -423,13 +423,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function IDENTIFIEREXP
 	public LlvmValue visit(IdentifierExp n){
-		/*
-		Identifier name = n.name;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmIdentifierExp(exp,LlvmPrimitiveType.I32, name));
-		return exp;
-		*/
-		return null;
+		return new LlvmRegister("%"+n.name.s+"_temp", n.type.accept(this).type);
 	}
 	//Function THIS:
 	public LlvmValue visit(This n){

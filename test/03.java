@@ -14,11 +14,11 @@ class k
 	public int TestMethod(int argsa, boolean argsb){
 		int dd;
 		int ee;
+		dd = 0;
 		ee = 3;
-		if (!(ee == 2)) {
-			dd = 3;
-		} else {
-			dd = 2;
+		while (ee < 7) {
+			dd = dd * ee;
+			ee = ee + 1;
 		}
 		
 		return 3;
