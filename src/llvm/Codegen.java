@@ -174,7 +174,7 @@ public class Codegen extends VisitorAdapter{
 		symTab.SetClassInUse(n.name.s);
 		
 		assembler.add(new LlvmConstantDeclaration("%class."+n.name.s, 
-				new LlvmStructure(symTab.GetClassInUse()._classStructure.typeList).toString()));
+				"type " + new LlvmStructure(symTab.GetClassInUse()._classStructure.typeList).toString()));
 
 		for (util.List<MethodDecl> m = n.methodList; m != null; m = m.tail){
 			m.head.accept(this);
@@ -243,6 +243,8 @@ public class Codegen extends VisitorAdapter{
 		}
 		
 		assembler.add(new LlvmRet(n.returnExp.accept(this)));
+		
+		assembler.add(new LlvmCloseDefinition());
 		
 		return null;
 	}
@@ -463,7 +465,7 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(NewArray n){
 		LlvmValue pretam = n.size.accept(this); 
 		
-		LlvmRegister tam = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
+		LlvmRegister tam = new LlvmRegister(LlvmPrimitiveType.I32);
 		
 		assembler.add(new LlvmPlus(tam, tam.type, pretam, new LlvmIntegerLiteral(1)));
 		
