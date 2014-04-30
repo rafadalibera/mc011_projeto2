@@ -8,14 +8,15 @@ entry:
   %tmp3 = load i32 * %tmp0
   ret i32 %tmp3
 }
-%class.k = { i32, i32 }
+%class.t = { i32 }
+%class.k = { i32, i32, %class.t * }
 define i32 @__TestMethod_k(%class.k * %this, i32 argsa, i1 argsb) {
   %tmp4 = alloca i32
   store i32 argsa, i32 * %tmp4
   %tmp5 = alloca i1
   store i1 argsb, i1 * %tmp5
-  %tmp6 = alloca i32 // aponta para dd
-  %tmp7 = alloca i32 //aponta para ee
+  %tmp6 = alloca i32
+  %tmp7 = alloca i32
   store i32 0, i32 * %tmp6
   store i32 3, i32 * %tmp7
 label0:

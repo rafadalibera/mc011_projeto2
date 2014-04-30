@@ -254,7 +254,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function INTARRAYTYPE:
 	public LlvmValue visit(IntArrayType n){
-		return new LlvmNamedValue("", LlvmPrimitiveType.I32p);
+		return new LlvmNamedValue("", new LlvmPointer(LlvmPrimitiveType.I32));
 	}
 	//Function BOOLEANTYPE:
 	public LlvmValue visit(BooleanType n){
@@ -266,7 +266,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function IDENTIFIERTYPE:
 	public LlvmValue visit(IdentifierType n){
-		return new LlvmNamedValue(n.name, LlvmPrimitiveType.I32);
+		return new LlvmNamedValue(n.name, symTab.GetClassInUse().GetClassType());
 	}
 	//Function BLOCK:
 	public LlvmValue visit(Block n){
@@ -389,6 +389,8 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function ARRAYLOOKUP:
 	public LlvmValue visit(ArrayLookup n){
+		
+		
 		
 		LlvmRegister addr = new LlvmRegister(LlvmPrimitiveType.I32p);
 		new LlvmTimes (addr, LlvmPrimitiveType.I32, n.index.accept(this), addr);
@@ -590,10 +592,10 @@ class SymTab extends VisitorAdapter{
 			return null;
 		}
 		public LlvmValue visit(IdentifierType n){
-			return new LlvmNamedValue("id", LlvmPrimitiveType.I8);
+			return new LlvmNamedValue(n.name, new LlvmPointer(classes.get(n.name)));
 		}
 		public LlvmValue visit(IntArrayType n){
-			return new LlvmNamedValue("int[]", LlvmPrimitiveType.I32p);
+			return new LlvmNamedValue("int[]", new LlvmPointer(LlvmPrimitiveType.I32));
 		}
 		public LlvmValue visit(BooleanType n){
 			return new LlvmNamedValue("BooleanType", LlvmPrimitiveType.I1);
