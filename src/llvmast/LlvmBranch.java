@@ -20,9 +20,9 @@ public  class LlvmBranch extends LlvmInstruction{
 
     public String toString(){
     	if (_simple == false) {
-    		return " br i1 %" + _cond + ", label %" + _brTrue + ", label %" + _brFalse;
+    		return "  " + "br i1 " + _cond + ", label %" + _brTrue + ", label %" + _brFalse;
     	} else {
-    		return " br label %" + _label;
+    		return "  " + "br label %" + _label;
     	}
     }
 }

@@ -14,7 +14,13 @@ class k
 	public int TestMethod(int argsa, boolean argsb){
 		int dd;
 		int ee;
-		ee = 4;
+		ee = 3;
+		if (!(ee == 2)) {
+			dd = 3;
+		} else {
+			dd = 2;
+		}
+		
 		return 3;
 	}
 	

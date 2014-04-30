@@ -14,6 +14,6 @@ public  class LlvmTimes extends LlvmInstruction{
     }
 
     public String toString(){
-		return " " + _lhs + " = mul " + _type + " " + _op1 + ", " + _op2;
+		return "  " + _lhs + " = mul " + _type + " " + _op1 + ", " + _op2;
     }
 }

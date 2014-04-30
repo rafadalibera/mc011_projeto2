@@ -53,8 +53,8 @@ public class Codegen extends VisitorAdapter{
 	private int indexLabel = -1;
 	
 	public int getIndexLabel(){
-		
-		return indexLabel + 1;
+		indexLabel = indexLabel + 1;
+		return indexLabel;
 	}
 
 	public Codegen(){
@@ -286,7 +286,7 @@ public class Codegen extends VisitorAdapter{
 		assembler.add(new LlvmBranch(labelEnd));
 		
 		if (n.elseClause != null) {
-			assembler.add(new LlvmLabel(labelEnd));
+			assembler.add(new LlvmLabel(labelElse));
 			n.elseClause.accept(this);
 			assembler.add(new LlvmBranch(labelEnd));
 		}
