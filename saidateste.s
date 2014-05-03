@@ -12,9 +12,9 @@ entry:
   ret i32 %tmp6
 }
 %class.Fac = type { }
-define i32 @__ComputeFac_Fac(%class.Fac * %this, i32 %num) {
+define i32 @__ComputeFac_Fac(%class.Fac * %this, i32 num) {
   %tmp7 = alloca i32
-  store i32 %num, i32 * %tmp7
+  store i32 num, i32 * %tmp7
   %tmp8 = alloca i32
   %tmp9 = load i32 * %tmp7
   %tmp10 = icmp slt i32 %tmp9, 1
@@ -26,7 +26,7 @@ label1:
   %tmp11 = load i32 * %tmp7
   %tmp12 = load i32 * %tmp7
   %tmp13 = sub i32 %tmp12, 1
-  %tmp14 = call i32  @__ComputeFac_Fac(%class.Fac * %fac, i32 %tmp13)
+  %tmp14 = call i32  @__ComputeFac_Fac(%class.Fac * Fac, i32 %tmp13)
   %tmp15 = mul i32 %tmp11, %tmp14
   store i32 %tmp15, i32 * %tmp8
   br label %label2
