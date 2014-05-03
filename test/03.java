@@ -11,12 +11,9 @@ class k
 {
 	int aa;
 	int bb;
-	public int TestMethod(){
-		
-		int a;
-		
-		a = 10;
-		
+	public int[] TestMethod(){
+		int[] a;
+		a = new int[5];
 		return a;
 	}
 	
