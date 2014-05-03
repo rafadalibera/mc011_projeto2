@@ -9,12 +9,16 @@ class j
 
 class k
 {
-	int aa;
+	int[] aa;
 	int bb;
 	public int[] TestMethod(){
-		int[] a;
-		a = new int[5];
-		return a;
+		
+		int a;
+		
+		a = 10;
+		
+		return aa;
+
 	}
 	
 }

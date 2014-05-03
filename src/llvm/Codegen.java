@@ -448,9 +448,18 @@ public class Codegen extends VisitorAdapter{
 	//Function IDENTIFIEREXP:
 	public LlvmValue visit(IdentifierExp n){
 		
-		LlvmRegister LlvmVarReg = (LlvmRegister)n.name.accept(this);
+		LlvmValue LlvmVarReg = n.name.accept(this);
 		
-		LlvmRegister ret = new LlvmRegister((LlvmPrimitiveType)LlvmVarReg.type);
+		LlvmRegister ret;
+		
+		Field f = symTab.GetClassInUse().GetField(n.name.s);
+		
+		if(f != null){
+			ret = new LlvmRegister(f._type);
+		}
+		else{
+			ret = new LlvmRegister(symTab.GetMethodInUse().GetVariable(n.name.s)._variable.type);
+		}
 		
 		assembler.add(new LlvmLoad(ret, LlvmVarReg));
 		
@@ -507,7 +516,7 @@ public class Codegen extends VisitorAdapter{
 			List<LlvmValue> offsets = new ArrayList<LlvmValue>();
 			offsets.add(new LlvmIntegerLiteral(0));
 			offsets.add(new LlvmIntegerLiteral(f._index));
-			assembler.add(new LlvmGetElementPointer(regadd, new LlvmRegister(new LlvmPointer(symTab.GetClassInUse())), offsets));
+			assembler.add(new LlvmGetElementPointer(regadd, new LlvmRegister("%this", new LlvmPointer(symTab.GetClassInUse())), offsets));
 			return regadd;
 		}
 	
