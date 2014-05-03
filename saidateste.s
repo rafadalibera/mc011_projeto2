@@ -17,10 +17,14 @@ define i32 @__ComputeFac_Fac(%class.Fac * %this) {
   %tmp6 = bitcast i8* %tmp8 to i32*
   store i32 10, i32 * %tmp6
   store i32 * %tmp6, i32 * * %tmp4
-  %tmp11 = add i32 5, 1
-  %tmp9 = mul i32 %tmp11, 4
-  %tmp10 = add i32 %tmp4, %tmp9
-  store i32 8, i32 * %tmp10
+  %tmp9 = load i32 * * %tmp4
+  %tmp12 = add i32 5, 1
+  %tmp13 = inttoptr i32 %tmp12 to i32 *
+  %tmp14 = mul i32 1, 4
+  %tmp15 = inttoptr i32 %tmp14 to i32 *
+  %tmp10 = mul i32 * %tmp13, %tmp15
+  %tmp11 = add i32 * %tmp9, %tmp10
+  store i32 8, i32 * %tmp11
   ret i32 0
 }
 declare i32 @printf (i8 *, ...)

@@ -331,18 +331,26 @@ public class Codegen extends VisitorAdapter{
 	//Function ARRAYASSIGN:
 	public LlvmValue visit(ArrayAssign n){
 		
-		LlvmValue regBase = n.var.accept(this);
+		LlvmValue regBaseO = n.var.accept(this);
+		LlvmValue regBase = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
 		LlvmRegister reg = new LlvmRegister(LlvmPrimitiveType.I32);
 		LlvmRegister regAccess = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
 		
-		LlvmRegister temp = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmLoad(regBase, regBaseO));
 		
-		assembler.add(new LlvmPlus(temp, LlvmPrimitiveType.I32, n.index.accept(this), new LlvmIntegerLiteral(1)));
+		LlvmRegister tempO = new LlvmRegister(LlvmPrimitiveType.I32);
 		
-		assembler.add(new LlvmTimes (reg, LlvmPrimitiveType.I32, temp, new LlvmIntegerLiteral(4)));
+		assembler.add(new LlvmPlus(tempO, LlvmPrimitiveType.I32, n.index.accept(this), new LlvmIntegerLiteral(1)));
 		
-		assembler.add(new LlvmPlus(regAccess, LlvmPrimitiveType.I32, regBase, reg));
+		assembler.add(new LlvmTimes (reg, LlvmPrimitiveType.I32, tempO, new LlvmIntegerLiteral(4)));
 		
+		LlvmRegister ptr = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
+		
+		assembler.add(new LlvmInttoptr(ptr, reg, toType))
+		
+		assembler.add(new LlvmPlus(regAccess, new LlvmPointer(LlvmPrimitiveType.I32), regBase, reg));
+		
+				
 		assembler.add(new LlvmStore(n.value.accept(this), regAccess));
 		
 		return null;
