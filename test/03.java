@@ -23,6 +23,7 @@ class k
 		GG t = new GG();
 		t.func();
 		return aa;
+
 	}
 	
 }
