@@ -9,15 +9,15 @@ class j
 
 class k
 {
-	int aa;
+	int[] aa;
 	int bb;
-	public int TestMethod(){
+	public int[] TestMethod(){
 		
 		int a;
 		
 		a = 10;
 		
-		return a;
+		return aa;
 	}
 	
 }
