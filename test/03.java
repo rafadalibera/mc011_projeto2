@@ -6,7 +6,7 @@ class j
     }
 }
 
-class GG{
+class good{
 	int dd;
 	int ee;
 	public int func(){
@@ -20,11 +20,14 @@ class k
 	int aa;
 	int bb;
 	public int TestMethod(){
-		GG t = new GG();
-		t.func();
+	
+		int b;
+		good f;
+		f = new good();
+		b = 10;
+		
 		return aa;
 
 	}
-	
 }
 

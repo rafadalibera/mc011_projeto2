@@ -268,7 +268,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function IDENTIFIERTYPE:
 	public LlvmValue visit(IdentifierType n){
-		return new LlvmNamedValue(n.name, symTab.GetClassInUse().GetClassType());
+		return new LlvmNamedValue(n.name, symTab.GetClassInUse());
 	}
 	//Function BLOCK:
 	public LlvmValue visit(Block n){
@@ -492,7 +492,7 @@ public class Codegen extends VisitorAdapter{
 		List<LlvmValue> args = new LinkedList<LlvmValue>();
 		args.add(sizeValue);
 		assembler.add(new LlvmCall(lhsMalloc, lhsMalloc.type, "@malloc", args));
-		LlvmRegister lhsBitCast = new LlvmRegister(n.className.accept(this).type);
+		LlvmRegister lhsBitCast = new LlvmRegister(new LlvmPointer(symTab.classes.get(n.className.s)));
 		assembler.add(new LlvmBitcast(lhsBitCast, lhsMalloc, lhsBitCast.type));
 		
 		return lhsBitCast;
@@ -707,7 +707,9 @@ class MethodVariable{
 		_variable = variable;
 	}
 	
-	
+	public LlvmRegister GetRegister(){
+		return new LlvmRegister(_register.name, new LlvmPointer(_variable.type).content);
+	}
 }
 
 class MethodNode {
