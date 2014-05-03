@@ -217,7 +217,8 @@ public class Codegen extends VisitorAdapter{
 		for (util.List<Formal> c = n.formals; c != null; c = c.tail)
 		{
 		
-				listaArgs.add(c.head.accept(this));
+				LlvmNamedValue temp = (LlvmNamedValue)c.head.accept(this);
+				listaArgs.add(new LlvmNamedValue("%" + temp.name, temp.type));
 				listaArgsString.add(c.head.name.s);
 			
 		}
@@ -474,7 +475,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function THIS:
 	public LlvmValue visit(This n){
-		return n.type.accept(this);
+		return new LlvmNamedValue("%this", n.type.accept(this).type);
 	}
 	//Function NEWARRAY:
 	public LlvmValue visit(NewArray n){

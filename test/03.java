@@ -1,40 +1,18 @@
-class j
-{
-    public static void main(String[] args)
-    {
-    	System.out.println(new good().func());
+class Factorial{
+    public static void main(String[] a){
+	System.out.println(new Fac().ComputeFac(10));
     }
 }
 
-class good{
-	int dd;
-	int ee;
-	public int func(){
-		System.out.println(999);
-		return 0;
-	}
+class Fac {
+
+    public int ComputeFac(int num){
+	int num_aux ;
+	if (num < 1)
+	    num_aux = 1 ;
+	else 
+	    num_aux = num * (this.ComputeFac(num-1)) ;
+	return num_aux ;
+    }
+
 }
-
-class good2{
-	public int func(){
-		return 0;
-	}
-}
-
-class k
-{
-	int aa;
-	int bb;
-	public int TestMethod(){
-	
-		int b;
-		good f;
-		f = new good();
-		b = f.func();
-		b = 10;
-		
-		return aa;
-
-	}
-}
-
