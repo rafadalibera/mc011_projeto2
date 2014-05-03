@@ -13,9 +13,11 @@ class k
 	int bb;
 	public int TestMethod(){
 		
-		aa = 10;
+		int a;
 		
-		return aa;
+		a = 10;
+		
+		return a;
 	}
 	
 }

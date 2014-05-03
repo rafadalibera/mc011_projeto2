@@ -447,11 +447,12 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function IDENTIFIEREXP:
 	public LlvmValue visit(IdentifierExp n){
-		MethodVariable v = symTab.GetMethodInUse().GetVariable(n.name.s);
 		
-		LlvmRegister ret = new LlvmRegister(v._variable.type);
+		LlvmRegister LlvmVarReg = (LlvmRegister)n.name.accept(this);
 		
-		assembler.add(new LlvmLoad(ret, v._register));
+		LlvmRegister ret = new LlvmRegister((LlvmPrimitiveType)LlvmVarReg.type);
+		
+		assembler.add(new LlvmLoad(ret, LlvmVarReg));
 		
 		return ret;
 	}

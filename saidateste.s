@@ -13,7 +13,7 @@ define i32 @__TestMethod_k(%class.k * %this) {
   %tmp4 = alloca i32
   store i32 10, i32 * %tmp4
   %tmp5 = load i32 * %tmp4
-  ret i32 %tmp5
+  ret i32 * %tmp5
 }
 declare i32 @printf (i8 *, ...)
 declare i8 * @malloc (i32)
