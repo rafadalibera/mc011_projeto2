@@ -331,10 +331,28 @@ public class Codegen extends VisitorAdapter{
 	//Function ARRAYASSIGN:
 	public LlvmValue visit(ArrayAssign n){
 		
+		LlvmValue ptrBase = n.var.accept(this);
+		
+		LlvmValue arrayBase = new LlvmRegister (new LlvmPointer (LlvmPrimitiveType.I32));		
+		assembler.add (new LlvmLoad (arrayBase, ptrBase));
+		
+		// Registrador que aponta para primeira posição
+		LlvmRegister elementPtr = new LlvmRegister( new LlvmPointer(LlvmPrimitiveType.I32));
+	    
+		List<LlvmValue> offsets = new LinkedList<LlvmValue> ();
+	    offsets.add(new LlvmIntegerLiteral(((LlvmIntegerLiteral)n.index.accept(this)).value+1));
+	    offsets.add(new LlvmIntegerLiteral(0));
+		
+		// Guarda endereço
+	    assembler.add (new LlvmGetElementPointer (elementPtr, arrayBase, offsets));	      
+	    assembler.add (new LlvmStore (n.value.accept (this), elementPtr));
+		return null;
+		/*
 		LlvmValue regBaseO = n.var.accept(this);
 		LlvmValue regBase = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
 		LlvmRegister reg = new LlvmRegister(LlvmPrimitiveType.I32);
 		LlvmRegister regAccess = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
+		
 		
 		assembler.add(new LlvmLoad(regBase, regBaseO));
 		
@@ -352,8 +370,8 @@ public class Codegen extends VisitorAdapter{
 		
 				
 		assembler.add(new LlvmStore(n.value.accept(this), regAccess));
-		
-		return null;
+		*/
+		//return null;
 	}
 	// Function AND:
 	public LlvmValue visit(And n){
