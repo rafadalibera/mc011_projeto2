@@ -268,7 +268,7 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function IDENTIFIERTYPE:
 	public LlvmValue visit(IdentifierType n){
-		return new LlvmNamedValue(n.name, symTab.classes.get(n.name));
+		return new LlvmNamedValue(n.name, new LlvmPointer(symTab.classes.get(n.name)));
 	}
 	//Function BLOCK:
 	public LlvmValue visit(Block n){
