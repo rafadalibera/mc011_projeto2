@@ -11,10 +11,11 @@ class k
 {
 	int aa;
 	int bb;
-	public int[] TestMethod(){
-		int[] a;
-		a = new int[5];
-		return a;
+	public int TestMethod(){
+		
+		aa = 10;
+		
+		return aa;
 	}
 	
 }

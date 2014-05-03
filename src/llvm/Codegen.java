@@ -323,15 +323,14 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function ASSIGN:
 	public LlvmValue visit(Assign n){
-		MethodVariable v = symTab.GetMethodInUse().GetVariable(n.var.s);
-		assembler.add(new LlvmStore(n.exp.accept(this), v._register));
+		LlvmValue val = n.var.accept(this);
+		assembler.add(new LlvmStore(n.exp.accept(this), val));
 		return null;
 	}
 	//Function ARRAYASSIGN:
 	public LlvmValue visit(ArrayAssign n){
-		MethodVariable v = symTab.GetMethodInUse().GetVariable(n.var.s);
 		
-		LlvmRegister regBase = v._register;
+		LlvmValue regBase = n.var.accept(this);
 		LlvmRegister reg = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
 		LlvmRegister regAccess = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
 		
@@ -458,7 +457,6 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function THIS:
 	public LlvmValue visit(This n){
-		
 		return n.type.accept(this);
 	}
 	//Function NEWARRAY:
@@ -498,7 +496,20 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function IDENTIFIER:
 	public LlvmValue visit(Identifier n){
-		return symTab.GetMethodInUse().GetVariable(n.s)._register;
+		Field f = symTab.GetClassInUse().GetField(n.s);
+		if(f == null){		
+			return symTab.GetMethodInUse().GetVariable(n.s)._register;
+		}
+		else
+		{
+			LlvmRegister regadd = new LlvmRegister(new LlvmPointer(f._type));
+			List<LlvmValue> offsets = new ArrayList<LlvmValue>();
+			offsets.add(new LlvmIntegerLiteral(0));
+			offsets.add(new LlvmIntegerLiteral(f._index));
+			assembler.add(new LlvmGetElementPointer(regadd, new LlvmRegister(new LlvmPointer(symTab.GetClassInUse())), offsets));
+			return regadd;
+		}
+	
 	}
 }
 
