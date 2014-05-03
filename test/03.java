@@ -10,7 +10,7 @@ class good{
 	int dd;
 	int ee;
 	public int func(){
-		dd = 2;
+		System.out.println(10);
 		return 0;
 	}
 }
@@ -24,6 +24,7 @@ class k
 		int b;
 		good f;
 		f = new good();
+		b = f.func();
 		b = 10;
 		
 		return aa;
