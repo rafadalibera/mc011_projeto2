@@ -11,7 +11,7 @@ entry:
 %class.good = type { i32, i32 }
 define i32 @__func_good(%class.good * %this) {
   %tmp4 = getelementptr [4 x i8] * @.formatting.string, i32 0, i32 0
-  %tmp5 = call i32 (i8 *, ...)* @printf(i8 * %tmp4, i32 10)
+  %tmp5 = call i32 (i8 *, ...)* @printf(i8 * %tmp4, i32 999)
   ret i32 0
 }
 %class.good2 = type { }
