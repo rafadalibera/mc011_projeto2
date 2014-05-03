@@ -21,11 +21,11 @@ define i32 @__func_good2(%class.good2 * %this) {
 %class.k = type { i32, i32 }
 define i32 @__TestMethod_k(%class.k * %this) {
   %tmp6 = alloca i32
-  %tmp7 = alloca %class.good
+  %tmp7 = alloca %class.good *
   %tmp8 = call i8 *  @malloc(i32 8)
   %tmp9 = bitcast i8 * %tmp8 to %class.good *
-  store %class.good * %tmp9, %class.good * %tmp7
-  %tmp10 = load %class.good * %tmp7
+  store %class.good * %tmp9, %class.good * * %tmp7
+  %tmp10 = load %class.good * * %tmp7
   %tmp11 = call i32  @__func_good(%class.good * %tmp10)
   store i32 %tmp11, i32 * %tmp6
   store i32 10, i32 * %tmp6
