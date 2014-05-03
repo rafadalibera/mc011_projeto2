@@ -10,7 +10,13 @@ class good{
 	int dd;
 	int ee;
 	public int func(){
-		System.out.println(10);
+		System.out.println(999);
+		return 0;
+	}
+}
+
+class good2{
+	public int func(){
 		return 0;
 	}
 }

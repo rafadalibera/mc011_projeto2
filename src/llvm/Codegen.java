@@ -426,14 +426,21 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function CALL:
 	public LlvmValue visit(Call n){
+		
+		LlvmValue regThis = n.object.accept(this);
 		List<LlvmValue> args = new ArrayList<LlvmValue>();
+		ClassNode classeMetodo = symTab.GetClassByMethodAndType(n.method.s, regThis.type);
+		
+		
+		
+		args.add(regThis);
 		
 		for(util.List<Exp> s = n.actuals; s != null; s = s.tail){
 			args.add(s.head.accept(this));
 		}
 		
-		LlvmRegister regResultado = new LlvmRegister(symTab.GetMethodInUse()._returnType.type);
-		assembler.add(new LlvmCall(regResultado, regResultado.type, "@__" + symTab.GetMethodInUse()._name + "_" + symTab.GetClassInUse()._name, args));
+		LlvmRegister regResultado = new LlvmRegister(classeMetodo.GetMethod(n.method.s)._returnType.type);
+		assembler.add(new LlvmCall(regResultado, regResultado.type, "@__" + n.method.s + "_" + classeMetodo._name, args));
 		
 		return regResultado;
 	}
@@ -552,7 +559,15 @@ class SymTab extends VisitorAdapter{
     	return methodEnv;
     }
     
-    
+    public ClassNode GetClassByMethodAndType(String methodName, LlvmType type){
+    	for(Map.Entry<String, ClassNode> entrada : classes.entrySet()){
+    		if(entrada.getValue().GetMethod(methodName) != null && type.toString().contains(entrada.getValue().toString())){
+    			return entrada.getValue();
+    		}
+    	}
+    	
+    	return null;
+    }
     
     //--------------------------------------//
     
