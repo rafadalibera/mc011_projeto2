@@ -9,8 +9,8 @@ class X {
     	int[] a;
     	a = new int[10];
     	a[5] = 8;
-    	System.out.println(a[5]);
-    	return 0;
+    	//System.out.println(a[5]);
+    	return a[5];
     }
 }
 
