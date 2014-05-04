@@ -311,6 +311,8 @@ public class Codegen extends VisitorAdapter{
 		LlvmLabelValue labelBegin = (new LlvmLabelValue("label" + getIndexLabel()));
 		LlvmLabelValue labelEnd = (new LlvmLabelValue("label" + getIndexLabel()));
 		
+		assembler.add(new LlvmBranch(labelLoop));
+		
 		assembler.add(new LlvmLabel(labelLoop));
 		
 		assembler.add(new LlvmBranch(n.condition.accept(this), labelBegin, labelEnd));
@@ -331,27 +333,44 @@ public class Codegen extends VisitorAdapter{
 	//Function ARRAYASSIGN:
 	public LlvmValue visit(ArrayAssign n){
 		
-		LlvmValue ptrBase = n.var.accept(this);
+		LlvmValue ptrptrBase = n.var.accept(this);
+		LlvmRegister ptrBase = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
+		assembler.add(new LlvmLoad(ptrBase, ptrptrBase));
+		LlvmRegister pointerToCell = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
+		List<LlvmValue> offsets = new ArrayList<LlvmValue>();
+		LlvmRegister offsetregtemp = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmTimes(offsetregtemp, LlvmPrimitiveType.I32, n.index.accept(this), new LlvmIntegerLiteral(1)));
+		LlvmRegister offsetreg = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmPlus(offsetreg, LlvmPrimitiveType.I32, offsetregtemp, new LlvmIntegerLiteral(1)));
+		offsets.add(offsetreg);
+		assembler.add(new LlvmGetElementPointer(pointerToCell, ptrBase, offsets));
+		assembler.add(new LlvmStore(n.value.accept(this), pointerToCell));
 		
-		LlvmValue arrayBase = new LlvmRegister (new LlvmPointer (LlvmPrimitiveType.I32));		
-		assembler.add (new LlvmLoad (arrayBase, ptrBase));
+		return null;		
 		
+		
+		
+		//LlvmValue ptrBase = n.var.accept(this);
+		
+//		LlvmValue arrayBase = new LlvmRegister (new LlvmPointer (LlvmPrimitiveType.I32));		
+//		assembler.add (new LlvmLoad (arrayBase, ptrBase));
+//		
 		// Registrador que aponta o inicio do vetor
-		LlvmRegister elementPtr = new LlvmRegister( new LlvmPointer(LlvmPrimitiveType.I8));
+//		LlvmRegister elementPtr = new LlvmRegister( new LlvmPointer(LlvmPrimitiveType.I8));
 	    // Carrega lista de offsets
-		List<LlvmValue> offsets = new LinkedList<LlvmValue> ();
-	    offsets.add(new LlvmIntegerLiteral(((LlvmIntegerLiteral)n.index.accept(this)).value+1));
+//		List<LlvmValue> offsets = new LinkedList<LlvmValue> ();
+//	    offsets.add(new LlvmIntegerLiteral(((LlvmIntegerLiteral)n.index.accept(this)).value+1));
 	    //offsets.add(new LlvmIntegerLiteral(0));
 		
 		// BitCast para usar getElementPointer
-	    LlvmValue xx = new LlvmRegister (new LlvmPointer(LlvmPrimitiveType.I8));
-	    assembler.add(new LlvmBitcast(xx, arrayBase, new LlvmPointer(LlvmPrimitiveType.I8)));
-	    assembler.add(new LlvmGetElementPointer (elementPtr, xx, offsets));	
+//	    LlvmValue xx = new LlvmRegister (new LlvmPointer(LlvmPrimitiveType.I8));
+//	    assembler.add(new LlvmBitcast(xx, arrayBase, new LlvmPointer(LlvmPrimitiveType.I8)));
+//	    assembler.add(new LlvmGetElementPointer (elementPtr, xx, offsets));	
 	    // BitCast para salvar 
-	    LlvmValue yy = new LlvmRegister (new LlvmPointer(LlvmPrimitiveType.I32));
-	    assembler.add(new LlvmBitcast(yy, elementPtr, new LlvmPointer(LlvmPrimitiveType.I32)));
-	    assembler.add(new LlvmStore (n.value.accept (this), yy));
-		return null;
+//	    LlvmValue yy = new LlvmRegister (new LlvmPointer(LlvmPrimitiveType.I32));
+//	    assembler.add(new LlvmBitcast(yy, elementPtr, new LlvmPointer(LlvmPrimitiveType.I32)));
+//	    assembler.add(new LlvmStore (n.value.accept (this), yy));
+	//	return null;
 		/*
 		LlvmValue regBaseO = n.var.accept(this);
 		LlvmValue regBase = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
@@ -383,17 +402,24 @@ public class Codegen extends VisitorAdapter{
 		LlvmValue v1 = n.lhs.accept(this);
 		LlvmValue v2 = n.rhs.accept(this);
 		
+		LlvmRegister v1temp = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmZext(v1temp, v1, LlvmPrimitiveType.I32));
+		
+		LlvmRegister v2temp = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmZext(v2temp, v2, LlvmPrimitiveType.I32));
+		
 		LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I32);
-		assembler.add(new LlvmIcmp(lhs, 0, LlvmPrimitiveType.I1,  v1, v2));
-
-		return lhs;	
+		assembler.add(new LlvmTimes(lhs, LlvmPrimitiveType.I32, v1temp, v2temp));
+		LlvmRegister ret = new LlvmRegister(LlvmPrimitiveType.I1);
+		assembler.add(new LlvmTrunc(ret, lhs, LlvmPrimitiveType.I1));
+		return ret;
 	}
 	//Function LESSTHAN:
 	public LlvmValue visit(LessThan n){
 		LlvmValue v1 = n.lhs.accept(this);
 		LlvmValue v2 = n.rhs.accept(this);
 		
-		LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I32);
+		LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I1);
 		assembler.add(new LlvmIcmp(lhs, 2, LlvmPrimitiveType.I32,  v1, v2));
 
 		return lhs;
@@ -403,7 +429,7 @@ public class Codegen extends VisitorAdapter{
 		LlvmValue v1 = n.lhs.accept(this);
 		LlvmValue v2 = n.rhs.accept(this);
 		
-		LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I32);
+		LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I1);
 		assembler.add(new LlvmIcmp(lhs, 1, LlvmPrimitiveType.I32,  v1, v2));
 
 		return lhs;
@@ -427,28 +453,40 @@ public class Codegen extends VisitorAdapter{
 	//Function ARRAYLOOKUP:
 	public LlvmValue visit(ArrayLookup n){
 		LlvmValue ptrBase = n.array.accept(this);
+		LlvmRegister pointerToCell = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
+		List<LlvmValue> offsets = new ArrayList<LlvmValue>();
+		LlvmRegister offsetregtemp = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmTimes(offsetregtemp, LlvmPrimitiveType.I32, n.index.accept(this), new LlvmIntegerLiteral(1)));
+		LlvmRegister offsetreg = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmPlus(offsetreg, LlvmPrimitiveType.I32, offsetregtemp, new LlvmIntegerLiteral(1)));
+		offsets.add(offsetreg);
+		assembler.add(new LlvmGetElementPointer(pointerToCell, ptrBase, offsets));
+		LlvmRegister valor = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmLoad(valor, pointerToCell));
+		return valor;		
 		
-		LlvmValue arrayBase = new LlvmRegister (new LlvmPointer (LlvmPrimitiveType.I32));		
-		assembler.add (new LlvmLoad (arrayBase, ptrBase));
+		
+		//LlvmValue arrayBase = new LlvmRegister (new LlvmPointer (LlvmPrimitiveType.I32));		
+		//assembler.add (new LlvmLoad (arrayBase, ptrBase));
 		
 		// Registrador que aponta o inicio do vetor
-		LlvmRegister elementPtr = new LlvmRegister( new LlvmPointer(LlvmPrimitiveType.I8));
+		//LlvmRegister elementPtr = new LlvmRegister( new LlvmPointer(LlvmPrimitiveType.I8));
 	    // Carrega lista de offsets
-		List<LlvmValue> offsets = new LinkedList<LlvmValue> ();
-	    offsets.add(new LlvmIntegerLiteral(((LlvmIntegerLiteral)n.index.accept(this)).value+1));
+		//List<LlvmValue> offsets = new LinkedList<LlvmValue> ();
+	    //offsets.add(new LlvmIntegerLiteral(((LlvmIntegerLiteral)n.index.accept(this)).value+1));
 	    //offsets.add(new LlvmIntegerLiteral(0));
 		
 		// BitCast para usar getElementPointer
-	    LlvmValue xx = new LlvmRegister (new LlvmPointer(LlvmPrimitiveType.I8));
-	    assembler.add(new LlvmBitcast(xx, arrayBase, new LlvmPointer(LlvmPrimitiveType.I8)));
-	    assembler.add(new LlvmGetElementPointer (elementPtr, xx, offsets));	
+	    //LlvmValue xx = new LlvmRegister (new LlvmPointer(LlvmPrimitiveType.I8));
+	    //assembler.add(new LlvmBitcast(xx, arrayBase, new LlvmPointer(LlvmPrimitiveType.I8)));
+	    //assembler.add(new LlvmGetElementPointer (elementPtr, xx, offsets));	
 	    // BitCast para salvar 
-	    LlvmValue yy = new LlvmRegister (new LlvmPointer(LlvmPrimitiveType.I32));
-	    assembler.add(new LlvmBitcast(yy, elementPtr, new LlvmPointer(LlvmPrimitiveType.I32)));
+	    //LlvmValue yy = new LlvmRegister (new LlvmPointer(LlvmPrimitiveType.I32));
+	    //assembler.add(new LlvmBitcast(yy, elementPtr, new LlvmPointer(LlvmPrimitiveType.I32)));
 	    
 	    //assembler.add(new LlvmStore (n.value.accept (this), yy));
-	    LlvmRegister ret = new LlvmRegister(LlvmPrimitiveType.I32);
-	    assembler.add(new LlvmLoad(ret, yy));
+	    //LlvmRegister ret = new LlvmRegister(LlvmPrimitiveType.I32);
+	    //assembler.add(new LlvmLoad(ret, yy));
 
 /*		
 		LlvmValue regBase = n.array.accept(this);
@@ -467,7 +505,7 @@ public class Codegen extends VisitorAdapter{
 		
 		assembler.add(new LlvmLoad(ret, regAccess));
 */		
-		return ret;
+		//return ret;
 	}
 	//Function ARRAYLENGTH:
 	public LlvmValue visit(ArrayLength n){
@@ -563,9 +601,13 @@ public class Codegen extends VisitorAdapter{
 	//Function NOT:
 	public LlvmValue visit(Not n) {
 		LlvmValue v = n.exp.accept(this);
+		LlvmRegister vtemp = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmZext(vtemp, v, LlvmPrimitiveType.I32));
 		LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I32);
-		assembler.add(new LlvmTimes(lhs, LlvmPrimitiveType.I32, v, v));
-		return lhs;
+		assembler.add(new LlvmPlus(lhs, LlvmPrimitiveType.I32, vtemp, new LlvmIntegerLiteral(1)));
+		LlvmRegister ret = new LlvmRegister(LlvmPrimitiveType.I1);
+		assembler.add(new LlvmTrunc(ret, lhs, LlvmPrimitiveType.I1));
+		return ret;
 	}
 	//Function IDENTIFIER:
 	public LlvmValue visit(Identifier n){
