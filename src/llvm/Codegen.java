@@ -526,7 +526,7 @@ public class Codegen extends VisitorAdapter{
 		List<LlvmValue> args = new ArrayList<LlvmValue>();
 		ClassNode classeMetodo = symTab.GetClassByMethodAndType(n.method.s, regThis.type);
 		
-		
+		//
 		
 		args.add(regThis);
 		
