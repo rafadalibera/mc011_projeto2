@@ -185,15 +185,16 @@ public class Codegen extends VisitorAdapter{
 	}
 	//Function CLASSDECLEXTENDS:
 	public LlvmValue visit(ClassDeclExtends n){
-		/*
-		Identifier superClass = n.superClass;
-		Identifier name = n.name;
-		util.List<VarDecl> varList = n.varList;
-		util.List<MethodDecl> methodList = n.methodList;
-		LlvmRegister exp = new LlvmRegister(LlvmPrimitiveType.I32);
-		//assembler.add(new LlvmClassDeclExtends(exp,LlvmPrimitiveType.I32, superClass, name, varList, methodList));
-		return exp;		
-		*/
+		
+		symTab.SetClassInUse(n.name.s);
+		
+		assembler.add(new LlvmConstantDeclaration("%class."+n.name.s, 
+				"type " + new LlvmStructure(symTab.GetClassInUse()._classStructure.typeList).toString()));
+
+		for (util.List<MethodDecl> m = n.methodList; m != null; m = m.tail){
+			m.head.accept(this);
+		}
+		
 		return null;
 	}
 	//Function VARDECL:
@@ -722,7 +723,46 @@ class SymTab extends VisitorAdapter{
 		return null;
 	}
 	
-		public LlvmValue visit(ClassDeclExtends n){return null;}
+		public LlvmValue visit(ClassDeclExtends n){
+			classes.put(n.name.s, new ClassNode(n.name.s));
+			SetClassInUse(n.name.s);
+			ClassNode classePai = classes.get(n.superClass.s);
+			
+			List<LlvmType> listaTipos = new LinkedList<LlvmType>();
+			
+			for(util.List<VarDecl> v = n.varList; v != null; v = v.tail){
+				LlvmValue field = v.head.accept(this);
+				GetClassInUse().AddField(field.toString(), field.type); //VarDecl tem de retornar seu tipo e seu nome
+				listaTipos.add(field.type);
+			}
+			
+			for(Map.Entry<String, Field> classField : classePai._classFields.entrySet()){
+				if(GetClassInUse()._classFields.get(classField.getKey()) == null){
+					GetClassInUse().AddField(classField.getKey(), classField.getValue()._type); //VarDecl tem de retornar seu tipo e seu nome
+					listaTipos.add(classField.getValue()._type);
+				}
+			}
+			
+			GetClassInUse().AddClassType(new LlvmStructure(listaTipos));
+			
+			for(util.List<MethodDecl> m = n.methodList; m != null; m = m.tail){
+				m.head.accept(this);
+			}
+			
+			
+			for(Map.Entry<String, MethodNode> mPai : classePai._methodList.entrySet()){
+				if(GetClassInUse()._methodList.get(mPai.getKey()) == null){
+					GetClassInUse().AddMethod(mPai.getKey(), new MethodNode(mPai.getKey(), mPai.getValue()._returnType));
+					SetMethodInUse(mPai.getKey());
+					
+					for(Map.Entry<String, MethodVariable> varPai : mPai.getValue()._variables.entrySet()){
+						GetMethodInUse().AddVariable(varPai.getKey(), varPai.getValue()._variable);
+					}
+				}
+			}
+			
+			return null;
+		}
 		public LlvmValue visit(VarDecl n){
 			return new LlvmNamedValue(n.name.s, n.type.accept(this).type);
 		}
