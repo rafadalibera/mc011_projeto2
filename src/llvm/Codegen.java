@@ -781,7 +781,7 @@ class SymTab extends VisitorAdapter{
 			return null;
 		}
 		public LlvmValue visit(IdentifierType n){
-			return new LlvmNamedValue(n.name, new LlvmPointer(classes.get(n.name)));
+			return new LlvmNamedValue(n.name, new LlvmPointer(new ClassNode(n.name)));
 		}
 		public LlvmValue visit(IntArrayType n){
 			return new LlvmNamedValue("int[]", new LlvmPointer(LlvmPrimitiveType.I32));
