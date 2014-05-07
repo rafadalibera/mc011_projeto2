@@ -289,7 +289,11 @@ public class Codegen extends VisitorAdapter{
 		LlvmLabelValue labelElse = (new LlvmLabelValue("label" + getIndexLabel()));
 		LlvmLabelValue labelEnd = (new LlvmLabelValue("label" + getIndexLabel()));
 		
-		assembler.add(new LlvmBranch(n.condition.accept(this), labelThan, labelElse));
+		if (n.elseClause != null) {
+			assembler.add(new LlvmBranch(n.condition.accept(this), labelThan, labelElse));
+		} else {
+			assembler.add(new LlvmBranch(n.condition.accept(this), labelThan, labelEnd));
+		}
 		
 		assembler.add(new LlvmLabel(labelThan));
 		n.thenClause.accept(this);
@@ -736,27 +740,29 @@ class SymTab extends VisitorAdapter{
 				listaTipos.add(field.type);
 			}
 			
-			for(Map.Entry<String, Field> classField : classePai._classFields.entrySet()){
-				if(GetClassInUse()._classFields.get(classField.getKey()) == null){
-					GetClassInUse().AddField(classField.getKey(), classField.getValue()._type); //VarDecl tem de retornar seu tipo e seu nome
-					listaTipos.add(classField.getValue()._type);
+			if (classePai != null) {
+				for(Map.Entry<String, Field> classField : classePai._classFields.entrySet()){
+					if(GetClassInUse()._classFields.get(classField.getKey()) == null){
+						GetClassInUse().AddField(classField.getKey(), classField.getValue()._type); //VarDecl tem de retornar seu tipo e seu nome
+						listaTipos.add(classField.getValue()._type);
+					}
 				}
 			}
-			
 			GetClassInUse().AddClassType(new LlvmStructure(listaTipos));
 			
 			for(util.List<MethodDecl> m = n.methodList; m != null; m = m.tail){
 				m.head.accept(this);
 			}
 			
-			
-			for(Map.Entry<String, MethodNode> mPai : classePai._methodList.entrySet()){
-				if(GetClassInUse()._methodList.get(mPai.getKey()) == null){
-					GetClassInUse().AddMethod(mPai.getKey(), new MethodNode(mPai.getKey(), mPai.getValue()._returnType));
-					SetMethodInUse(mPai.getKey());
-					
-					for(Map.Entry<String, MethodVariable> varPai : mPai.getValue()._variables.entrySet()){
-						GetMethodInUse().AddVariable(varPai.getKey(), varPai.getValue()._variable);
+			if (classePai != null) {
+				for(Map.Entry<String, MethodNode> mPai : classePai._methodList.entrySet()){
+					if(GetClassInUse()._methodList.get(mPai.getKey()) == null){
+						GetClassInUse().AddMethod(mPai.getKey(), new MethodNode(mPai.getKey(), mPai.getValue()._returnType));
+						SetMethodInUse(mPai.getKey());
+						
+						for(Map.Entry<String, MethodVariable> varPai : mPai.getValue()._variables.entrySet()){
+							GetMethodInUse().AddVariable(varPai.getKey(), varPai.getValue()._variable);
+						}
 					}
 				}
 			}
